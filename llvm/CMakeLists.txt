@@ -353,6 +353,7 @@ set(LLVM_ALL_TARGETS
   WebAssembly
   X86
   XCore
+  MYRISCVX
   )
 
 # List of targets with JIT support:
