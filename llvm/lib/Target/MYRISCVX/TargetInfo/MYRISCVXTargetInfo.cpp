@@ -1,6 +1,6 @@
-#include "MYRICVX.h"
+#include "MYRISCVX.h"
 #include "llvm/IR/Module.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
@@ -17,10 +17,10 @@ namespace llvm {
 }
 
 
-extern "C" void LLVMInitializeMYRISCVXTargetINFO{
-    RegisterTarget<Triple::myriscvx32>, /*HasJIT=*/true>
+extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMYRISCVXTargetInfo() {
+    RegisterTarget<Triple::myriscvx32, /*HasJIT=*/true>
         X(getTheMYRISCVX32Target(), "myriscvx32", "MYRISCVX (32-bit)", "MYRISCVX");
 
-    RegisterTarget<Triple::myriscvx64>, /*HasJIT=*/true>
+    RegisterTarget<Triple::myriscvx64, /*HasJIT=*/true>
         Y(getTheMYRISCVX64Target(), "myriscvx64", "MYRISCVX (64-bit)", "MYRISCVX");
 }

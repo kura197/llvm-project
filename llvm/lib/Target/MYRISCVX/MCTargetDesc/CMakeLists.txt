@@ -1,3 +1,3 @@
-add_llvm_component_library(LLVMMYRISCVDesc
+add_llvm_component_library(LLVMMYRISCVXDesc
   MYRISCVXMCTargetDesc.cpp
 )

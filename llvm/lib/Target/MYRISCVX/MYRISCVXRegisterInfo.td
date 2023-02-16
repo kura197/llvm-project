@@ -46,12 +46,12 @@ let Namespace = "MYRISCVX" in {
 
 def XLenVT : ValueTypeByHwMode<[RV32, RV64, DefaultMode], [i32, i64, i32]>;
 
-def GPR : RegisterClass<"MYRISCVX", XLenVT, 32, (add
+def GPR : RegisterClass<"MYRISCVX", [XLenVT], 32, (add
   ZERO,
   A0, A1, A2, A3, A4, A5, A6, A7,
   T0, T1, T2, T3, T4, T5, T6,
-  FP, S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11,
+  FP, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11,
   RA, SP, GP, TP
   )> {
-    let RegInfo = RegInfoByHwMode<[RV32, RV64, DefaultMode], [RegInfo<32, 32, 32>, RegInfo<64, 64, 64>, RegInfo<32, 32, 32>]>;
+    let RegInfos = RegInfoByHwMode<[RV32, RV64, DefaultMode], [RegInfo<32, 32, 32>, RegInfo<64, 64, 64>, RegInfo<32, 32, 32>]>;
 }
