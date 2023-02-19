@@ -1,4 +1,5 @@
 #include "MYRISCVX.h"
+#include "MYRISCVXTargetInfo.h"
 #include "llvm/IR/Module.h"
 #include "llvm/MC/TargetRegistry.h"
 

@@ -1,0 +1,10 @@
+#ifndef LLVM_LIB_TARGET_MYRISCVX_TARGETINFO_MYRISCVXTARGETINFO_H
+#define LLVM_LIB_TARGET_MYRISCVX_TARGETINFO_MYRISCVXTARGETINFO_H
+
+namespace llvm {
+    class Target;
+    Target &getTheMYRISCVX32Target();
+    Target &getTheMYRISCVX64Target();
+}
+
+#endif
