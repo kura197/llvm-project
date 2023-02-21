@@ -1,0 +1,16 @@
+
+#include "llvm/MC/MCRegister.h"
+#include "llvm/MC/MCInst.h"
+#include "llvm/CodeGen/TargetRegisterInfo.h"
+
+#define GET_REGINFO_HEADER
+#include "MYRISCVXGenRegisterInfo.inc"
+
+namespace llvm {
+    class MYRISCVXRegisterInfo : public MYRISCVXGenRegisterInfo {
+        const MCPhysReg* getCalleeSaveRegs(const MachineFunction* MF) const;
+        const uint32_t* getCallPreservedMask(const MachineFunction &MF, CallingConv::ID) const;
+        BitVector getReservedRegs(const MachineFunction &MF) const;
+        void MYRISCVXRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj, unsigned FIOperandNum, RegScavenger *RS) const;
+    };
+}
