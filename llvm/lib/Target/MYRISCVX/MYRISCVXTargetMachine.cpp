@@ -18,6 +18,9 @@
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/MC/TargetRegistry.h"
+
+#define DEBUG_TYPE "riscv-disassembler"
+
 using namespace llvm;
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMYRISCVXTarget() {
@@ -28,14 +31,17 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMYRISCVXTarget() {
 static StringRef computeDataLayout(const Triple &TT, StringRef CPU, const TargetOptions &Options) {
     std::string Ret = "";
     Ret += "e";
-    Ret += "-m:e";
+    //Ret += "-m:e";
+    Ret += "-m:m";
 
     if (TT.isAArch64()) Ret += "-p:64:64";
     else Ret += "-p:32:32";
 
-    Ret += "-i8:32-i16:32-i32:32-i64:64";
+    Ret += "-i8:8:32-i16:16:32-i64:64";
     if (TT.isAArch64()) Ret += "-n64-S128";
     else Ret += "-n32-S64";
+
+    LLVM_DEBUG(dbgs() << "DataLayout: " << Ret << "\n");
 
     return Ret;
 }
@@ -71,7 +77,7 @@ MYRISCVXTargetMachine::MYRISCVXTargetMachine(const Target &T, const Triple &TT, 
     LLVMTargetMachine(T, computeDataLayout(TT, CPU, Options), TT,
                       CPU, FS, Options, getEffectiveRelocModel(JIT, RM),
                       getEffectiveCodeModel(CM, CodeModel::Small), OL),
-                      TLOF(std::make_unique<MYRISCVXELFTargetObjectFile>())
+                      TLOF(std::make_unique<MYRISCVXTargetObjectFile>())
                       // TODO
                       //ABI(MYRISCVXABIINfo::computeTargetABI(Options.MCOptions.getABIName())),
                       //DefaultSubtarget(TT, CPU, CPU, FS, *this) 

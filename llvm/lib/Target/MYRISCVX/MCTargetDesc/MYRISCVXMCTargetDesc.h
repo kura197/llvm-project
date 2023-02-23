@@ -24,4 +24,13 @@ extern Target TheMYRISCVXXelTarget;
 
 }
 
+#define GET_REGINFO_ENUM
+#include "MYRISCVXGenRegisterInfo.inc"
+
+#define GET_INSTRINFO_ENUM
+#include "MYRISCVXGenInstrInfo.inc"
+
+#define GET_SUBTARGETINFO_ENUM
+#include "MYRISCVXGenSubtargetInfo.inc"
+
 #endif

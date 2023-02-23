@@ -1,7 +1,8 @@
 
 #include "MYRISCVXRegisterInfo.h"
+#include "MYRISCVXFrameLowering.h"
+#include "MCTargetDesc/MYRISCVXMCTargetDesc.h"
 
-#define GET_REGINFO_ENUM
 #define GET_REGINFO_TARGET_DESC
 #include "MYRISCVXGenRegisterInfo.inc"
 // TODO:

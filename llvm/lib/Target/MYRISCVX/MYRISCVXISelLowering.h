@@ -1,3 +1,4 @@
+#pragma once
 
 #include "MYRISCVX.h"
 #include "llvm/CodeGen/TargetLowering.h"
