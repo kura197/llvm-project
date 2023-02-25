@@ -9,6 +9,11 @@
 
 namespace llvm {
     class MYRISCVXInstrInfo : public MYRISCVXGenInstrInfo {
+        virtual void anchor();
 
+        public:
+        explicit MYRISCVXInstrInfo();
+
+        unsigned GetInstSizeInBytes(const MachineInstr &MI) const;
     };
 }

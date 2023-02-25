@@ -18,8 +18,8 @@
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
-class MYRISCVXTargetMachine;
-class FunctionPass;
+    class MYRISCVXTargetMachine;
+    class FunctionPass;
 }
 
 #endif

@@ -1,5 +1,8 @@
 
 #include "MYRISCVXISelLowering.h"
+#include "MYRISCVXTargetMachine.h"
+#include "MYRISCVXSubtarget.h"
+#include "MCTargetDesc/MYRISCVXABIInfo.h"
 
 namespace llvm {
     SDValue MYRISCVXTargetLowering::LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv, bool isVarArg,
@@ -16,4 +19,13 @@ namespace llvm {
         // TODO:
         return Chain;
     }
+
+    MYRISCVXTargetLowering::MYRISCVXTargetLowering(const MYRISCVXTargetMachine &TM, const MYRISCVXSubtarget &STI) : 
+        TargetLowering(TM), Subtarget(STI), ABI(TM.getABI()) {
+            MVT XLenVT = Subtarget.getXLenVT();
+
+            addRegisterClass(XLenVT, &MYRISCVX::GPRRegClass);
+            setMinFunctionAlignment(Align(4));
+            computeRegisterProperties(STI.getRegisterInfo());
+    } 
 }

@@ -1,6 +1,7 @@
 
 #include "MYRISCVXRegisterInfo.h"
 #include "MYRISCVXFrameLowering.h"
+#include "MYRISCVXSubtarget.h"
 #include "MCTargetDesc/MYRISCVXMCTargetDesc.h"
 
 #define GET_REGINFO_TARGET_DESC
@@ -9,7 +10,10 @@
 //#include "MYRISCVXMachineFunction.h"
 
 namespace llvm {
-    const MCPhysReg* MYRISCVXRegisterInfo::getCalleeSaveRegs(const MachineFunction* MF) const {
+    MYRISCVXRegisterInfo::MYRISCVXRegisterInfo(const MYRISCVXSubtarget &Subtarget, unsigned HwMode) : 
+        MYRISCVXGenRegisterInfo(MYRISCVX::RA, 0, 0, 0, HwMode) {}
+
+    const MCPhysReg* MYRISCVXRegisterInfo::getCalleeSavedRegs(const MachineFunction* MF) const {
         //TODO:
         return CSR_LP32_SaveList;
     }
@@ -34,5 +38,10 @@ namespace llvm {
     void MYRISCVXRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj, 
                                                    unsigned FIOperandNum, RegScavenger *RS) const {
         //TODO:
+    }
+
+    Register MYRISCVXRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
+        const TargetFrameLowering *TFI = MF.getSubtarget().getFrameLowering();
+        return TFI->hasFP(MF) ? MYRISCVX::FP : MYRISCVX::SP;
     }
 }
