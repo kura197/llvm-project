@@ -11,8 +11,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "MYRISCVXMCTargetDesc.h"
+#include "MYRISCVXMCAsmInfo.h"
 
-//#include "TargetInfo/MYRISCVXTargetInfo.h"
+#include "TargetInfo/MYRISCVXTargetInfo.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/MC/MCAsmBackend.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -39,5 +40,12 @@
 
 using namespace llvm;
 
+static MCAsmInfo *createMYRISCVXMCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT, const MCTargetOptions &Options) {
+    MCAsmInfo *MAI = new MYRISCVXMCAsmInfo(TT);
+}
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMYRISCVXTargetMC() {
+    for (Target *T : {getTheMYRISCVX32Target(), getTheMYRISCVX64Target()}) {
+         RegisterMCAsmInfoFn X(*T, createMYRISCVXMCAsmInfo);
+    }
 }

@@ -77,9 +77,9 @@ MYRISCVXTargetMachine::MYRISCVXTargetMachine(const Target &T, const Triple &TT, 
     LLVMTargetMachine(T, computeDataLayout(TT, CPU, Options), TT,
                       CPU, FS, Options, getEffectiveRelocModel(JIT, RM),
                       getEffectiveCodeModel(CM, CodeModel::Small), OL),
-                      TLOF(std::make_unique<MYRISCVXTargetObjectFile>()),
-                      ABI(MYRISCVXABIInfo::computeTargetABI(Options.MCOptions.getABIName())),
-                      DefaultSubtarget(TT, CPU, CPU, FS, *this) 
+    TLOF(std::make_unique<MYRISCVXTargetObjectFile>()),
+    ABI(MYRISCVXABIInfo::computeTargetABI(Options.MCOptions.getABIName())),
+    DefaultSubtarget(TT, CPU, CPU, FS, *this) 
 {
     initAsmInfo();
 }
