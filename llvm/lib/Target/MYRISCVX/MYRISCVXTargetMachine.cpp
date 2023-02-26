@@ -28,7 +28,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMYRISCVXTarget() {
     RegisterTargetMachine<MYRISCVX64TargetMachine> Y(getTheMYRISCVX64Target()); 
 }
 
-static StringRef computeDataLayout(const Triple &TT, StringRef CPU, const TargetOptions &Options) {
+static std::string computeDataLayout(const Triple &TT, StringRef CPU, const TargetOptions &Options) {
     std::string Ret = "";
     Ret += "e";
     //Ret += "-m:e";
