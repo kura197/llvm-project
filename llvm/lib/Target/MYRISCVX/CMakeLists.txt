@@ -7,6 +7,10 @@ tablegen(LLVM MYRISCVXGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM MYRISCVXGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM MYRISCVXGenMCPseudoLowering.inc -gen-pseudo-lowering)
 tablegen(LLVM MYRISCVXGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM MYRISCVXGenCodeEmitter.inc -gen-emitter)
+tablegen(LLVM MYRISCVXGenMCCodeEmitter.inc -gen-emitter)
+
+tablegen(LLVM MYRISCVXGenAsmWriter.inc -gen-asm-writer)
 
 add_public_tablegen_target(MYRISCVXCommonTableGen)
 
@@ -15,9 +19,12 @@ add_llvm_target(MYRISCVXCodeGen
   MYRISCVXSubtarget.cpp
   MYRISCVXRegisterInfo.cpp
   MYRISCVXISelLowering.cpp
+  MYRISCVXMachineFunction.cpp
   MYRISCVXFrameLowering.cpp
   MYRISCVXInstrInfo.cpp
   MYRISCVXTargetObjectFile.cpp
+  MYRISCVXAsmPrinter.cpp
+  MYRISCVXMCInstLower.cpp
 )
 
 add_subdirectory(MCTargetDesc)
