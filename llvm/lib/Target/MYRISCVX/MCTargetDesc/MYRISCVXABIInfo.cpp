@@ -3,7 +3,7 @@
 
 namespace llvm {
     MYRISCVXABIInfo MYRISCVXABIInfo::computeTargetABI(StringRef ABIName) {
-        MYRISCVXABIInfo abi(ABI::UnKnown);
+        MYRISCVXABIInfo abi(ABI::Unknown);
 
         if (ABIName.empty()) return ABI::LP;
         else if (ABIName == "lp") return ABI::LP;
