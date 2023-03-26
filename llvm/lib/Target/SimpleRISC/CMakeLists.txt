@@ -5,6 +5,7 @@ set(LLVM_TARGET_DEFINITIONS SimpleRISC.td)
 tablegen(LLVM SimpleRISCGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM SimpleRISCGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM SimpleRISCGenSubtargetInfo.inc -gen-subtarget)
+tablegen(LLVM SimpleRISCGenAsmMatcher.inc -gen-asm-matcher)
 
 add_public_tablegen_target(SimpleRISCCommonTableGen)
 
@@ -13,5 +14,6 @@ add_llvm_target(SimpleRISCCodeGen
   SimpleRISCInstrInfo.cpp
 )
 
+add_subdirectory(AsmParser)
 add_subdirectory(MCTargetDesc)
 add_subdirectory(TargetInfo)

@@ -27,6 +27,7 @@ using namespace llvm;
 
 std::pair<const char *, uint64_t> SimpleRISCInstPrinter::getMnemonic(const MCInst *MI) {
   // TODO:
+  return std::make_pair(nullptr, 0);
 }
 
 void SimpleRISCInstPrinter::printInst(const MCInst *MI, uint64_t Address, StringRef Annot,

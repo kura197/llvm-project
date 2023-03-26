@@ -16,8 +16,13 @@ include "SimpleRISCInstrInfo.td"
 def SimpleRISCInstrInfo : InstrInfo {
 }
 
+def SimpleRISCAsmParser : AsmParser {
+    let ShouldEmitMatchRegisterAltName = 1;
+}
+
 def SimpleRISC: Target {
     let InstructionSet = SimpleRISCInstrInfo;
+    let AssemblyParsers = [SimpleRISCAsmParser];
 }
 
 def FeatureR32 : SubtargetFeature<"32bit", "HasR32", "true", "R32 support">;
