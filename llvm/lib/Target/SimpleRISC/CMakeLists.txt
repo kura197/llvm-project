@@ -9,6 +9,7 @@ add_public_tablegen_target(SimpleRISCCommonTableGen)
 
 add_llvm_target(SimpleRISCCodeGen
   SimpleRISCTargetMachine.cpp
+  SimpleRISCInstrInfo.cpp
 )
 
 add_subdirectory(MCTargetDesc)

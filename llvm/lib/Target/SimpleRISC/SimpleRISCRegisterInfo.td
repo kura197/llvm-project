@@ -50,9 +50,9 @@ def R29 : SimpleRISCReg<29, "R29", []>, DwarfRegNum<[29]>;
 def R30 : SimpleRISCReg<30, "R30", []>, DwarfRegNum<[30]>;
 def R31 : SimpleRISCReg<31, "R31", []>, DwarfRegNum<[31]>;
 
-def XLenVT : ValueTypeByHwMode<[R32], [i32]>;
+def XLenVT : ValueTypeByHwMode<[R32, DefaultMode], [i32, i32]>;
 
-def XLenRI : RegInfoByHwMode<[R32], [RegInfo<32, 32, 32>]>;
+def XLenRI : RegInfoByHwMode<[R32, DefaultMode], [RegInfo<32, 32, 32>, RegInfo<32, 32, 32>]>;
 
 def GPR : RegisterClass<"SimpleRISC", [XLenVT], 32, (add (sequence "R%u", 1, 31), R0 )> {
   let RegInfos = XLenRI;

@@ -13,6 +13,9 @@ def R32 : HwMode<"+32bit">;
 include "SimpleRISCRegisterInfo.td"
 include "SimpleRISCInstrInfo.td"
 
+def SimpleRISCInstrInfo : InstrInfo {
+}
+
 def SimpleRISC: Target {
-    //let InstructionSet = SimpleRISCInstrInfo;
+    let InstructionSet = SimpleRISCInstrInfo;
 }

@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "SimpleRISC.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
@@ -22,6 +22,6 @@ namespace llvm {
   }
 }
 
-extern "C" void LLVMInitializeSimpleRISCTarget() {
+extern "C" void LLVMInitializeSimpleRISCTargetInfo() {
   RegisterTarget<Triple::simplerisc, true> X(getTheSimpleRISCTarget(), "simplerisc", "SimpleRISC (32-bit)", "SimpleRISC");
 }
