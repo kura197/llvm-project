@@ -30,7 +30,7 @@ namespace llvm {
 #define GET_INSTRINFO_MC_HELPER_DECLS
 #include "SimpleRISCGenInstrInfo.inc"
 
-//#define GET_SUBTARGETINFO_ENUM
-//#include "SimpleRISCGenSubtargetInfo.inc"
+#define GET_SUBTARGETINFO_ENUM
+#include "SimpleRISCGenSubtargetInfo.inc"
 
 #endif

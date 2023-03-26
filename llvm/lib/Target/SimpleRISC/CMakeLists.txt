@@ -4,6 +4,7 @@ set(LLVM_TARGET_DEFINITIONS SimpleRISC.td)
 
 tablegen(LLVM SimpleRISCGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM SimpleRISCGenInstrInfo.inc -gen-instr-info)
+tablegen(LLVM SimpleRISCGenSubtargetInfo.inc -gen-subtarget)
 
 add_public_tablegen_target(SimpleRISCCommonTableGen)
 

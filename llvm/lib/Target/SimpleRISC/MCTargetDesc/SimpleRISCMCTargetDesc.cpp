@@ -11,6 +11,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "SimpleRISCMCTargetDesc.h"
+#include "SimpleRISCMCAsmInfo.h"
+#include "SimpleRISCInstPrinter.h"
 #include "TargetInfo/SimpleRISCTargetInfo.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/MC/MCAsmBackend.h"
@@ -33,35 +35,35 @@
 #define GET_REGINFO_MC_DESC
 #include "SimpleRISCGenRegisterInfo.inc"
 
-//#define GET_SUBTARGETINFO_MC_DESC
-//#include "SimpleRISCGenSubtargetInfo.inc"
+#define GET_SUBTARGETINFO_MC_DESC
+#include "SimpleRISCGenSubtargetInfo.inc"
 
 using namespace llvm;
 
-//static MCInstrInfo *createSimpleRISCMCInstrInfo() {
-//  MCInstrInfo *X = new MCInstrInfo();
-//  InitSimpleRISCMCInstrInfo(X);
-//  return X;
-//}
-//
-//static MCRegisterInfo *createSimpleRISCMCRegisterInfo(const Triple &TT) {
-//  MCRegisterInfo *X = new MCRegisterInfo();
-//  InitSimpleRISCMCRegisterInfo(X, SimpleRISC::X1);
-//  return X;
-//}
-//
-//static MCAsmInfo *createSimpleRISCMCAsmInfo(const MCRegisterInfo &MRI,
-//                                       const Triple &TT,
-//                                       const MCTargetOptions &Options) {
-//  MCAsmInfo *MAI = new SimpleRISCMCAsmInfo(TT);
-//
-//  MCRegister SP = MRI.getDwarfRegNum(SimpleRISC::X2, true);
-//  MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, SP, 0);
-//  MAI->addInitialFrameState(Inst);
-//
-//  return MAI;
-//}
-//
+static MCInstrInfo *createSimpleRISCMCInstrInfo() {
+  MCInstrInfo *X = new MCInstrInfo();
+  InitSimpleRISCMCInstrInfo(X);
+  return X;
+}
+
+static MCRegisterInfo *createSimpleRISCMCRegisterInfo(const Triple &TT) {
+  MCRegisterInfo *X = new MCRegisterInfo();
+  InitSimpleRISCMCRegisterInfo(X, SimpleRISC::R0);
+  return X;
+}
+
+static MCAsmInfo *createSimpleRISCMCAsmInfo(const MCRegisterInfo &MRI,
+                                            const Triple &TT,
+                                            const MCTargetOptions &Options) {
+  MCAsmInfo *MAI = new SimpleRISCMCAsmInfo(TT);
+
+  MCRegister SP = MRI.getDwarfRegNum(SimpleRISC::R1, true);
+  MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, SP, 0);
+  MAI->addInitialFrameState(Inst);
+
+  return MAI;
+}
+
 //static MCObjectFileInfo *
 //createSimpleRISCMCObjectFileInfo(MCContext &Ctx, bool PIC,
 //                            bool LargeCodeModel = false) {
@@ -69,23 +71,23 @@ using namespace llvm;
 //  MOFI->initMCObjectFileInfo(Ctx, PIC, LargeCodeModel);
 //  return MOFI;
 //}
-//
-//static MCSubtargetInfo *createSimpleRISCMCSubtargetInfo(const Triple &TT,
-//                                                   StringRef CPU, StringRef FS) {
-//  if (CPU.empty() || CPU == "generic")
-//    CPU = TT.isArch64Bit() ? "generic-rv64" : "generic-rv32";
-//
-//  return createSimpleRISCMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
-//}
-//
-//static MCInstPrinter *createSimpleRISCMCInstPrinter(const Triple &T,
-//                                               unsigned SyntaxVariant,
-//                                               const MCAsmInfo &MAI,
-//                                               const MCInstrInfo &MII,
-//                                               const MCRegisterInfo &MRI) {
-//  return new SimpleRISCInstPrinter(MAI, MII, MRI);
-//}
-//
+
+static MCSubtargetInfo *createSimpleRISCMCSubtargetInfo(const Triple &TT,
+                                                        StringRef CPU, StringRef FS) {
+  if (CPU.empty() || CPU == "generic")
+    CPU = "cpu-r32";
+
+  return createSimpleRISCMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+}
+
+static MCInstPrinter *createSimpleRISCMCInstPrinter(const Triple &T,
+                                                    unsigned SyntaxVariant,
+                                                    const MCAsmInfo &MAI,
+                                                    const MCInstrInfo &MII,
+                                                    const MCRegisterInfo &MRI) {
+  return new SimpleRISCInstPrinter(MAI, MII, MRI);
+}
+
 //static MCTargetStreamer *
 //createSimpleRISCObjectTargetStreamer(MCStreamer &S, const MCSubtargetInfo &STI) {
 //  const Triple &TT = STI.getTargetTriple();
@@ -157,14 +159,14 @@ using namespace llvm;
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSimpleRISCTargetMC() {
   for (Target *T : {&getTheSimpleRISCTarget()}) {
-    //TargetRegistry::RegisterMCAsmInfo(*T, createSimpleRISCMCAsmInfo);
+    TargetRegistry::RegisterMCAsmInfo(*T, createSimpleRISCMCAsmInfo);
     //TargetRegistry::RegisterMCObjectFileInfo(*T, createSimpleRISCMCObjectFileInfo);
-    //TargetRegistry::RegisterMCInstrInfo(*T, createSimpleRISCMCInstrInfo);
-    //TargetRegistry::RegisterMCRegInfo(*T, createSimpleRISCMCRegisterInfo);
+    TargetRegistry::RegisterMCInstrInfo(*T, createSimpleRISCMCInstrInfo);
+    TargetRegistry::RegisterMCRegInfo(*T, createSimpleRISCMCRegisterInfo);
     //TargetRegistry::RegisterMCAsmBackend(*T, createSimpleRISCAsmBackend);
     //TargetRegistry::RegisterMCCodeEmitter(*T, createSimpleRISCMCCodeEmitter);
-    //TargetRegistry::RegisterMCInstPrinter(*T, createSimpleRISCMCInstPrinter);
-    //TargetRegistry::RegisterMCSubtargetInfo(*T, createSimpleRISCMCSubtargetInfo);
+    TargetRegistry::RegisterMCInstPrinter(*T, createSimpleRISCMCInstPrinter);
+    TargetRegistry::RegisterMCSubtargetInfo(*T, createSimpleRISCMCSubtargetInfo);
     //TargetRegistry::RegisterELFStreamer(*T, createSimpleRISCELFStreamer);
     //TargetRegistry::RegisterObjectTargetStreamer(
     //    *T, createSimpleRISCObjectTargetStreamer);

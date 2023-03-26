@@ -19,3 +19,7 @@ def SimpleRISCInstrInfo : InstrInfo {
 def SimpleRISC: Target {
     let InstructionSet = SimpleRISCInstrInfo;
 }
+
+def FeatureR32 : SubtargetFeature<"32bit", "HasR32", "true", "R32 support">;
+
+def : ProcessorModel<"cpu-r32", NoSchedModel, [FeatureR32]>;

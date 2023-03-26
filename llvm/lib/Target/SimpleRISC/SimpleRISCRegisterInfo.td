@@ -17,8 +17,8 @@ let Namespace = "SimpleRISC" in {
   }
 }
 
-def R0 : SimpleRISCReg<0, "R0", ["SP"]>, DwarfRegNum<[0]>;
-def R1 : SimpleRISCReg<1, "R1", []>, DwarfRegNum<[1]>;
+def R0 : SimpleRISCReg<0, "R0", ["RA"]>, DwarfRegNum<[0]>;
+def R1 : SimpleRISCReg<1, "R1", ["SP"]>, DwarfRegNum<[1]>;
 def R2 : SimpleRISCReg<2, "R2", []>, DwarfRegNum<[2]>;
 def R3 : SimpleRISCReg<3, "R3", []>, DwarfRegNum<[3]>;
 def R4 : SimpleRISCReg<4, "R4", []>, DwarfRegNum<[4]>;
@@ -54,6 +54,6 @@ def XLenVT : ValueTypeByHwMode<[R32, DefaultMode], [i32, i32]>;
 
 def XLenRI : RegInfoByHwMode<[R32, DefaultMode], [RegInfo<32, 32, 32>, RegInfo<32, 32, 32>]>;
 
-def GPR : RegisterClass<"SimpleRISC", [XLenVT], 32, (add (sequence "R%u", 1, 31), R0 )> {
+def GPR : RegisterClass<"SimpleRISC", [XLenVT], 32, (add (sequence "R%u", 2, 31), R0, R1)> {
   let RegInfos = XLenRI;
 }
