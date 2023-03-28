@@ -43,29 +43,23 @@ class SimpleRISCAsmParser : public MCTargetAsmParser {
 #define GET_ASSEMBLER_HEADER
 #include "SimpleRISCGenAsmMatcher.inc"
 
-  //TODO:
-  bool parseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) override {
-
-  }
-
-  OperandMatchResultTy tryParseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) override {
-  }
-
+  bool parseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) override;
+  OperandMatchResultTy tryParseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) override;
   bool ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
-                        SMLoc NameLoc, OperandVector &Operands) override {
-
-  }
-
-  bool ParseDirective(AsmToken DirectiveID) override {
-
-  }
-
+                        SMLoc NameLoc, OperandVector &Operands) override;
+  bool ParseOperand(OperandVector &Operands, StringRef Mnemonic);
+  bool ParseDirective(AsmToken DirectiveID) override;
   bool MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
                                OperandVector &Operands, MCStreamer &Out,
                                uint64_t &ErrorInfo,
-                               bool MatchingInlineAsm) override {
+                               bool MatchingInlineAsm) override;
 
-  }
+  SMLoc getLoc() const {return getParser().getTok().getLoc(); }
+
+  OperandMatchResultTy parseRegister(OperandVector &Operands);
+  OperandMatchResultTy parseImmediate(OperandVector &Operands);
+  OperandMatchResultTy parseOperandWithModifier(OperandVector &Operands);
+  OperandMatchResultTy parseMemOperand(OperandVector &Operands);
 
 public:
   SimpleRISCAsmParser(const MCSubtargetInfo &STI, MCAsmParser &Parser,
@@ -82,16 +76,24 @@ struct SimpleRISCOperand final : public MCParsedAsmOperand {
     Immediate
   } Kind;
 
+  struct RegOp {
+    MCRegister RegNum;
+  };
+
+  struct ImmOp {
+    const MCExpr *Val;
+  };
+
   union {
     StringRef Tok;
-    MCRegister RegNum;
-    const MCExpr *Val;
+    RegOp Reg;
+    ImmOp Imm;
   };
 
   SMLoc StartLoc, EndLoc;
 
-  public:
   SimpleRISCOperand(KindTy K) : Kind(K) {}
+  public:
   SimpleRISCOperand(const SimpleRISCOperand &o) : MCParsedAsmOperand() {
       Kind = o.Kind;
       StartLoc = o.StartLoc;
@@ -105,7 +107,7 @@ struct SimpleRISCOperand final : public MCParsedAsmOperand {
 
   unsigned getReg() const override {
     assert(isReg() && "Invalid type access!");
-    return RegNum.id();
+    return Reg.RegNum.id();
   };
 
   StringRef getToken() const {
@@ -124,14 +126,166 @@ struct SimpleRISCOperand final : public MCParsedAsmOperand {
   void print(raw_ostream &OS) const override {
     //TODO:
   }
-};
 
+  static std::unique_ptr<SimpleRISCOperand> CreateToken(StringRef Str, SMLoc S) {
+    auto Op = std::make_unique<SimpleRISCOperand>(KindTy::Token);
+    Op->Tok = Str;
+    Op->StartLoc = S;
+    Op->EndLoc = S;
+    return Op;
+  }
+
+  static std::unique_ptr<SimpleRISCOperand> CreateRegister(unsigned RegNo, SMLoc S, SMLoc E) {
+    auto Op = std::make_unique<SimpleRISCOperand>(KindTy::Register);
+    Op->Reg.RegNum = MCRegister::from(RegNo);
+    Op->StartLoc = S;
+    Op->EndLoc = E;
+    return Op;
+  }
+
+  static std::unique_ptr<SimpleRISCOperand> CreateImmediate(const MCExpr *Val, SMLoc S, SMLoc E) {
+    auto Op = std::make_unique<SimpleRISCOperand>(KindTy::Immediate);
+    Op->Imm.Val = Val;
+    Op->StartLoc = S;
+    Op->EndLoc = E;
+    return Op;
+  }
+};
 
 #define GET_REGISTER_MATCHER
 #define GET_SUBTARGET_FEATURE_NAME
 #define GET_MATCHER_IMPLEMENTATION
 #define GET_MNEMONIC_SPELL_CHECKER
 #include "SimpleRISCGenAsmMatcher.inc"
+
+bool SimpleRISCAsmParser::parseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) {
+}
+
+OperandMatchResultTy SimpleRISCAsmParser::tryParseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) {
+}
+
+bool SimpleRISCAsmParser::ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
+                      SMLoc NameLoc, OperandVector &Operands) {
+  Operands.push_back(SimpleRISCOperand::CreateToken(Name, NameLoc));
+  if (getLexer().isNot(AsmToken::EndOfStatement)) {
+    if (ParseOperand(Operands, Name)) {
+      SMLoc Loc = getLexer().getLoc();
+      getParser().eatToEndOfStatement();
+      return Error(Loc, "unexpected token in argument list");
+    }
+
+    while (getLexer().is(AsmToken::Comma)) {
+      getParser().Lex();
+      if (ParseOperand(Operands, Name)) {
+        SMLoc Loc = getLexer().getLoc();
+        getParser().eatToEndOfStatement();
+        return Error(Loc, "unexpected token in argument list");
+      }
+    }
+  }
+
+  if (getLexer().isNot(AsmToken::EndOfStatement)) {
+    SMLoc Loc = getLexer().getLoc();
+    getParser().eatToEndOfStatement();
+    return Error(Loc, "unexpected token in argument list");
+  }
+
+  getParser().Lex();
+  return false;
+}
+
+bool SimpleRISCAsmParser::ParseOperand(OperandVector &Operands, StringRef Mnemonic) {
+  // TODO:
+  //OperandMatchResultTy Result = MatchOperandParserImpl(Operands, Mnemonic, true);
+  //if (Result == MatchOperand_Success) return false;
+  //if (Result == MatchOperand_ParseFail) return true;
+
+  LLVM_DEBUG(dbgs() << ".. Parse Operand: " << getLexer().getTok().getIdentifier() << "\n");
+
+  if (parseRegister(Operands) == MatchOperand_Success) {
+    return false;
+  }
+
+  if (parseImmediate(Operands) == MatchOperand_Success) {
+    if (getLexer().is(AsmToken::LParen)) {
+      return parseMemOperand(Operands) != MatchOperand_Success;
+    }
+    return false;
+  }
+
+  LLVM_DEBUG(dbgs() << "unknown operands\n");
+  return true;
+}
+
+bool SimpleRISCAsmParser::ParseDirective(AsmToken DirectiveID) {
+
+}
+
+bool SimpleRISCAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
+                              OperandVector &Operands, MCStreamer &Out,
+                              uint64_t &ErrorInfo,
+                              bool MatchingInlineAsm) {
+}
+
+OperandMatchResultTy SimpleRISCAsmParser::parseRegister(OperandVector &Operands) {
+  switch(getLexer().getKind()) {
+    default:
+      return MatchOperand_NoMatch;
+    case AsmToken::Identifier:
+      StringRef Name = getLexer().getTok().getIdentifier();
+      unsigned RegNo = MatchRegisterName(Name);
+      if (RegNo == 0) {
+        RegNo = MatchRegisterAltName(Name);
+        if (RegNo == 0) {
+          return MatchOperand_NoMatch;
+        }
+      }
+
+      SMLoc S = getLoc();
+      SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
+      getLexer().Lex();
+      Operands.push_back(SimpleRISCOperand::CreateRegister(RegNo, S, E));
+  }
+
+  return MatchOperand_Success;
+}
+
+OperandMatchResultTy SimpleRISCAsmParser::parseImmediate(OperandVector &Operands) {
+  SMLoc S = getLoc();
+  SMLoc E;
+  const MCExpr *Res;
+
+  switch(getLexer().getKind()) {
+    default:
+      return MatchOperand_NoMatch;
+    // TODO: check
+    case AsmToken::LParen:
+    case AsmToken::Dot:
+    case AsmToken::Minus:
+    case AsmToken::Plus:
+    case AsmToken::Exclaim: // !
+    case AsmToken::Tilde: // ~
+    case AsmToken::Integer:
+    case AsmToken::String:
+    case AsmToken::Identifier:
+      if (getParser().parseExpression(Res, E)) {
+        return MatchOperand_ParseFail;
+      }
+      break;
+    case AsmToken::Percent:
+      return parseOperandWithModifier(Operands);
+  }
+
+  Operands.push_back(SimpleRISCOperand::CreateImmediate(Res, S, E));
+}
+
+OperandMatchResultTy SimpleRISCAsmParser::parseOperandWithModifier(OperandVector &Operands) {
+
+}
+
+OperandMatchResultTy SimpleRISCAsmParser::parseMemOperand(OperandVector &Operands) {
+
+}
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSimpleRISCAsmParser() {
   RegisterMCAsmParser<SimpleRISCAsmParser> X(getTheSimpleRISCTarget());
