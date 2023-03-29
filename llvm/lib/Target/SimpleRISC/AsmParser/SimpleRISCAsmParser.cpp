@@ -225,6 +225,21 @@ bool SimpleRISCAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
                               OperandVector &Operands, MCStreamer &Out,
                               uint64_t &ErrorInfo,
                               bool MatchingInlineAsm) {
+  MCInst Inst;
+  FeatureBitset MissingFeatures;
+  auto Result = MatchInstructionImpl(Operands, Inst, ErrorInfo, MissingFeatures, MatchingInlineAsm);
+
+  switch(Result) {
+    //TODO: add entry
+    default:
+      break;
+    case Match_Success:
+      Inst.setLoc(IDLoc);
+      Out.emitInstruction(Inst, getSTI());
+      return false;
+  }
+
+  llvm_unreachable("Unknown match type detected!");
 }
 
 OperandMatchResultTy SimpleRISCAsmParser::parseRegister(OperandVector &Operands) {

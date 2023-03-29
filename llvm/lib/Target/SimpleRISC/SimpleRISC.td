@@ -20,9 +20,15 @@ def SimpleRISCAsmParser : AsmParser {
     let ShouldEmitMatchRegisterAltName = 1;
 }
 
+def SimpleRISCAsmWriter : AsmWriter {
+    //TOOD: check
+    int PassSubtarget = 1;
+}
+
 def SimpleRISC: Target {
     let InstructionSet = SimpleRISCInstrInfo;
     let AssemblyParsers = [SimpleRISCAsmParser];
+    let AssemblyWriters = [SimpleRISCAsmWriter];
 }
 
 def FeatureR32 : SubtargetFeature<"32bit", "HasR32", "true", "R32 support">;

@@ -6,6 +6,7 @@ tablegen(LLVM SimpleRISCGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM SimpleRISCGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM SimpleRISCGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM SimpleRISCGenAsmMatcher.inc -gen-asm-matcher)
+tablegen(LLVM SimpleRISCGenAsmWriter.inc -gen-asm-writer)
 
 add_public_tablegen_target(SimpleRISCCommonTableGen)
 

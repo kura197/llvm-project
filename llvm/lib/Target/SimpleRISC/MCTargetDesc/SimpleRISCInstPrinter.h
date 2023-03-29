@@ -25,9 +25,16 @@ public:
       : MCInstPrinter(MAI, MII, MRI) {}
 
   std::pair<const char *, uint64_t> getMnemonic(const MCInst *MI) override;
+  void printInstruction(const MCInst *MI, uint64_t Address, const MCSubtargetInfo &STI, raw_ostream &O);
+  const char *getRegisterName(MCRegister Reg);
+  bool printAliasInstr(const MCInst *MI, uint64_t Address, const MCSubtargetInfo &STI, raw_ostream &OS);
 
   void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                  const MCSubtargetInfo &STI, raw_ostream &OS) override;
+
+  void printOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O);
+  void printMemOperand(const MCInst *MI, unsigned OpNum, raw_ostream &O);
+  void printRegName(raw_ostream &O, MCRegister Reg) override const;
 };
 } // namespace llvm
 

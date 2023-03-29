@@ -24,13 +24,40 @@ using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
 
-
-std::pair<const char *, uint64_t> SimpleRISCInstPrinter::getMnemonic(const MCInst *MI) {
-  // TODO:
-  return std::make_pair(nullptr, 0);
-}
+#define PRINT_ALIAS_INSTR
+#include "SimpleRISCGenAsmWriter.inc"
 
 void SimpleRISCInstPrinter::printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                                       const MCSubtargetInfo &STI, raw_ostream &OS) {
-  // TODO:
+  if (!PrintAliases) {
+    printInstruction(MI, Address, STI, OS);
+  }
+  printAnnotation(OS, Annot);
+}
+
+void SimpleRISCInstPrinter::printOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O) {
+  const MCOperand &Op = MI->getOperand(OpNo);
+  if (Op.isReg()) {
+    printRegName(O, Op.getReg());
+    return;
+  }
+
+  if (Op.isImm()) {
+    O << Op.getImm();
+    return;
+  }
+
+  assert(Op.isExpr() && "unknown operand kind in printOperand");
+  Op.getExpr()->print(O, &MAI, true);
+}
+
+void SimpleRISCInstPrinter::printRegName(raw_ostream &O, MCRegister Reg) {
+  O << getRegisterName(Reg);
+}
+
+void SimpleRISCInstPrinter::printMemOperand(const MCInst *MI, unsigned OpNum, raw_ostream &O) {
+  printOperand(MI, OpNum+1, O);
+  O << "(";
+  printOperand(MI, OpNum, O);
+  O << ")";
 }
