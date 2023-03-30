@@ -33,3 +33,5 @@ def SHL : ArithLogicR<0b0101, "shl", shl, GPR>;
 def SHR : ArithLogicR<0b0110, "shr", srl, GPR>;
 //TODO:
 //def SLT : ArithLogicR<0b0111, "slt", setlt, GPR>;
+
+// TODO: B, JA, LD, ST

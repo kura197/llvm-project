@@ -6,14 +6,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-class InstFormat<bits<2> val> {
-    bits<2> Value = val;
+class InstFormat<bits<3> val> {
+    bits<3> Value = val;
 }
 
 def InstFormatA : InstFormat<0>;
 def InstFormatM : InstFormat<1>;
 def InstFormatB : InstFormat<2>;
 def InstFormatJ : InstFormat<3>;
+def InstFormatL : InstFormat<4>;
+def InstFormatS : InstFormat<5>;
 
 class SimpleRISCInst<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin, InstFormat f> : Instruction {
     let Size = 4;
@@ -31,7 +33,7 @@ class SimpleRISCInst<dag outs, dag ins, string asmstr, list<dag> pattern, InstrI
     let Pattern = pattern;
     let Itinerary = itin;
 
-    let TSFlags{1-0} = f.Value;
+    let TSFlags{2-0} = f.Value;
 
     let DecoderNamespace = "SimpleRISC";
 
@@ -91,4 +93,33 @@ class SimpleRISC_J<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
     let Inst{26-22} = rd;
     let Inst{21-17} = rs1;
     let Inst{16-0}  = 0;
+}
+
+class SimpleRISC_L<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatL> {
+
+    bits<5> rd;
+    bits<5> rs1;
+    bits<17> simm17;
+
+    let Inst{31}    = 0;
+    let Inst{30-27} = 0b1010;
+    let Inst{26-22} = rd;
+    let Inst{21-17} = rs1;
+    let Inst{16-0}  = simm17;
+}
+
+class SimpleRISC_S<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatS> {
+
+    bits<5> rs1;
+    bits<5> rs2;
+    bits<17> simm17;
+
+    let Inst{31}    = 0;
+    let Inst{30-27} = 0b1011;
+    let Inst{26-22} = simm17{16-12};
+    let Inst{21-17} = rs1;
+    let Inst{16-12} = rs2;
+    let Inst{11-0}  = simm17{11-0};
 }

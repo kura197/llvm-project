@@ -20,6 +20,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/FormattedStream.h"
+#include "llvm/Support/Debug.h"
 using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
@@ -29,13 +30,16 @@ using namespace llvm;
 
 void SimpleRISCInstPrinter::printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                                       const MCSubtargetInfo &STI, raw_ostream &OS) {
-  if (!PrintAliases) {
-    printInstruction(MI, Address, STI, OS);
-  }
+  LLVM_DEBUG(dbgs() << "SimpleRISCInstPrinter::printInst\n");
+
+  //if (!PrintAliases) {
+  //}
+
+  printInstruction(MI, Address, STI, OS);
   printAnnotation(OS, Annot);
 }
 
-void SimpleRISCInstPrinter::printOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O) {
+void SimpleRISCInstPrinter::printOperand(const MCInst *MI, unsigned OpNo, const MCSubtargetInfo &STI, raw_ostream &O) {
   const MCOperand &Op = MI->getOperand(OpNo);
   if (Op.isReg()) {
     printRegName(O, Op.getReg());
@@ -51,13 +55,14 @@ void SimpleRISCInstPrinter::printOperand(const MCInst *MI, unsigned OpNo, raw_os
   Op.getExpr()->print(O, &MAI, true);
 }
 
-void SimpleRISCInstPrinter::printRegName(raw_ostream &O, MCRegister Reg) {
+void SimpleRISCInstPrinter::printRegName(raw_ostream &O, MCRegister Reg) const {
   O << getRegisterName(Reg);
 }
 
-void SimpleRISCInstPrinter::printMemOperand(const MCInst *MI, unsigned OpNum, raw_ostream &O) {
-  printOperand(MI, OpNum+1, O);
-  O << "(";
-  printOperand(MI, OpNum, O);
-  O << ")";
-}
+// TODO:
+//void SimpleRISCInstPrinter::printMemOperand(const MCInst *MI, unsigned OpNum, raw_ostream &O) {
+//  printOperand(MI, OpNum+1, O);
+//  O << "(";
+//  printOperand(MI, OpNum, O);
+//  O << ")";
+//}
