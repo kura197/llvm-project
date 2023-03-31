@@ -110,6 +110,11 @@ struct SimpleRISCOperand final : public MCParsedAsmOperand {
     return Reg.RegNum.id();
   };
 
+  const MCExpr* getImm() const {
+    assert(isImm() && "Invalid type access!");
+    return Imm.Val;
+  };
+
   StringRef getToken() const {
     assert(isToken() && "Invalid type access!");
     return Tok;
@@ -121,6 +126,22 @@ struct SimpleRISCOperand final : public MCParsedAsmOperand {
   void addRegOperands(MCInst &Inst, unsigned N) const {
     assert(N == 1 && "Invalid number of operands!");
     Inst.addOperand(MCOperand::createReg(getReg()));
+  }
+
+  void addExpr(MCInst &Inst, const MCExpr* Expr) const {
+    assert(Expr && "Expr shouldn't be null!");
+    // TODO: check
+    if (!Expr)
+      Inst.addOperand(MCOperand::createImm(0));
+    else if (const MCConstantExpr *CE = dyn_cast<MCConstantExpr>(Expr))
+      Inst.addOperand(MCOperand::createImm(CE->getValue()));
+    else
+      Inst.addOperand(MCOperand::createExpr(Expr));
+  }
+
+  void addImmOperands(MCInst &Inst, unsigned N) const {
+    assert(N == 1 && "Invalid number of operands!");
+    addExpr(Inst, getImm());
   }
 
   void print(raw_ostream &OS) const override {

@@ -68,19 +68,21 @@ class SimpleRISC_M<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
     let Inst{21-0}  = simm26{21-0};
 }
 
-class SimpleRISC_B<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
-    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
-
-    bits<5> rs1;
-    bits<5> rs2;
-
-    let Inst{31}    = 0;
-    let Inst{30-27} = 0b1000;
-    let Inst{26-22} = 0;
-    let Inst{21-17} = rs1;
-    let Inst{16-12} = rs2;
-    let Inst{11-0}  = 0;
-}
+// TODO:
+//class SimpleRISC_B<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+//    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
+//
+//    bits<5> rs1;
+//    bits<24> simm24;
+//
+//    let Inst{31}    = 0;
+//    let Inst{30-27} = 0b1000;
+//    let Inst{26-22} = simm24{23-19};
+//    let Inst{21-17} = rs1;
+//    let Inst{16-0} = simm24{18-2};
+//
+//    simm24{1-0} = 0;
+//}
 
 class SimpleRISC_J<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
     SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
@@ -95,7 +97,7 @@ class SimpleRISC_J<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
     let Inst{16-0}  = 0;
 }
 
-class SimpleRISC_L<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+class SimpleRISC_L<bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
     SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatL> {
 
     bits<5> rd;
@@ -103,13 +105,13 @@ class SimpleRISC_L<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
     bits<17> simm17;
 
     let Inst{31}    = 0;
-    let Inst{30-27} = 0b1010;
+    let Inst{30-27} = opcode;
     let Inst{26-22} = rd;
     let Inst{21-17} = rs1;
     let Inst{16-0}  = simm17;
 }
 
-class SimpleRISC_S<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+class SimpleRISC_S<bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
     SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatS> {
 
     bits<5> rs1;
@@ -117,7 +119,7 @@ class SimpleRISC_S<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
     bits<17> simm17;
 
     let Inst{31}    = 0;
-    let Inst{30-27} = 0b1011;
+    let Inst{30-27} = opcode;
     let Inst{26-22} = simm17{16-12};
     let Inst{21-17} = rs1;
     let Inst{16-12} = rs2;
