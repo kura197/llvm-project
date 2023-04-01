@@ -55,6 +55,11 @@ void SimpleRISCInstPrinter::printOperand(const MCInst *MI, unsigned OpNo, const 
   Op.getExpr()->print(O, &MAI, true);
 }
 
+void SimpleRISCInstPrinter::printOperand(const MCInst *MI, uint64_t &Address, unsigned OpNo, const MCSubtargetInfo &STI, raw_ostream &O) {
+  //TODO: check
+  printOperand(MI, OpNo, STI, O);
+}
+
 void SimpleRISCInstPrinter::printRegName(raw_ostream &O, MCRegister Reg) const {
   O << getRegisterName(Reg);
 }

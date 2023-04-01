@@ -33,6 +33,7 @@ public:
                  const MCSubtargetInfo &STI, raw_ostream &OS) override;
 
   void printOperand(const MCInst *MI, unsigned OpNo, const MCSubtargetInfo &STI, raw_ostream &O);
+  void printOperand(const MCInst *MI, uint64_t &Address, unsigned OpNo, const MCSubtargetInfo &STI, raw_ostream &O);
   void printMemOperand(const MCInst *MI, unsigned OpNum, raw_ostream &O);
   void printRegName(raw_ostream &O, MCRegister Reg) const override;
 };

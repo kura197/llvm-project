@@ -69,20 +69,18 @@ class SimpleRISC_M<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
 }
 
 // TODO:
-//class SimpleRISC_B<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
-//    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
-//
-//    bits<5> rs1;
-//    bits<24> simm24;
-//
-//    let Inst{31}    = 0;
-//    let Inst{30-27} = 0b1000;
-//    let Inst{26-22} = simm24{23-19};
-//    let Inst{21-17} = rs1;
-//    let Inst{16-0} = simm24{18-2};
-//
-//    simm24{1-0} = 0;
-//}
+class SimpleRISC_B<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
+
+    bits<5> rs1;
+    bits<22> simm22;
+
+    let Inst{31}    = 0;
+    let Inst{30-27} = 0b1000;
+    let Inst{26-22} = simm22{21-17};
+    let Inst{21-17} = rs1;
+    let Inst{16-0} = simm22{16-0};
+}
 
 class SimpleRISC_J<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
     SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {

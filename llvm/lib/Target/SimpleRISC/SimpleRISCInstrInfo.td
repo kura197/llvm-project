@@ -17,8 +17,6 @@
 
 include "SimpleRISCInstrFormats.td"
 
-// TODO: B, JA
-
 class ArithLogicR<bits<4> opcode, string instr_asm, SDNode OpNode, RegisterClass RC> :
     SimpleRISC_A<opcode, (outs RC:$rd), (ins RC:$rs1, RC:$rs2),
                  !strconcat(instr_asm, "\t$rd, $rs1, $rs2"),
@@ -40,6 +38,10 @@ def simm17 : Operand<XLenVT>, ImmLeaf<XLenVT, [{return isInt<17>(Imm);}]> {
     // add DecoderMethod for dis-assembler
 }
 
+def brtarget22 : Operand<XLenVT>, ImmLeaf<XLenVT, [{return isInt<22>(Imm);}]> {
+    let OperandType = "OPERAND_PCREL";
+}
+
 let canFoldAsLoad = 1 in
 class LoadMemory<bits<4> opcode, string instr_asm, RegisterClass RC> :
     SimpleRISC_L<opcode, (outs RC:$rd), (ins RC:$rs1, simm17:$simm17),
@@ -55,3 +57,20 @@ def LB : LoadMemory<0b1100, "lb", GPR>;
 def SW : StoreMemory<0b1101, "sw", GPR>;
 def SH : StoreMemory<0b1110, "sh", GPR>;
 def SB : StoreMemory<0b1111, "sb", GPR>;
+
+
+let isCall = 1 in
+class JumpAndLink<string instr_asm, RegisterClass RC> :
+    SimpleRISC_J<(outs RC:$rd), (ins RC:$rs1), !strconcat(instr_asm, "\t$rd, $rs1"), [], NoItinerary>;
+
+def JA : JumpAndLink<"ja", GPR>;
+
+
+class CBranch<string instr_asm> :
+    SimpleRISC_B<(outs), (ins brtarget22:$imm), 
+    !strconcat(instr_asm, "\t${imm}"), [], NoItinerary> {
+    let isBranch = 1;
+    let isTerminator = 1;
+}
+
+def B : CBranch<"br">;
