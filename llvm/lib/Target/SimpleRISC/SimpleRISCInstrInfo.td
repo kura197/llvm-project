@@ -31,8 +31,16 @@ def OR  : ArithLogicR<0b0011, "or",  or,  GPR>;
 def XOR : ArithLogicR<0b0100, "xor", xor, GPR>;
 def SHL : ArithLogicR<0b0101, "shl", shl, GPR>;
 def SHR : ArithLogicR<0b0110, "shr", srl, GPR>;
-//TODO:
-//def SLT : ArithLogicR<0b0111, "slt", setlt, GPR>;
+
+class SetCC_R<bits<4> opcode, string instr_asm, PatFrag cond_op, RegisterClass RC> :
+    SimpleRISC_A<opcode, (outs RC:$rd), (ins RC:$rs1, RC:$rs2),
+                 !strconcat(instr_asm, "\t$rd, $rs1, $rs2"),
+                 [(set RC:$rd, (cond_op RC:$rs1, RC:$rs2))], NoItinerary> {
+    let isReMaterializable = 1;
+}
+
+// TODO: add sltu
+def SLT : SetCC_R<0b0111, "slt", setlt, GPR>;
 
 def simm17 : Operand<XLenVT>, ImmLeaf<XLenVT, [{return isInt<17>(Imm);}]> {
     // add DecoderMethod for dis-assembler
@@ -66,11 +74,11 @@ class JumpAndLink<string instr_asm, RegisterClass RC> :
 def JA : JumpAndLink<"ja", GPR>;
 
 
-class CBranch<string instr_asm> :
-    SimpleRISC_B<(outs), (ins brtarget22:$imm), 
-    !strconcat(instr_asm, "\t${imm}"), [], NoItinerary> {
+class CBranch<string instr_asm, RegisterClass RC> :
+    SimpleRISC_B<(outs), (ins RC:$rs1, brtarget22:$imm), 
+    !strconcat(instr_asm, "\t$rs1, ${imm}"), [], NoItinerary> {
     let isBranch = 1;
     let isTerminator = 1;
 }
 
-def B : CBranch<"br">;
+def B : CBranch<"br", GPR>;
