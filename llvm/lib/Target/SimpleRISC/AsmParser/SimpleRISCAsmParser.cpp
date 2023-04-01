@@ -221,7 +221,12 @@ bool SimpleRISCAsmParser::ParseOperand(OperandVector &Operands, StringRef Mnemon
   //if (Result == MatchOperand_Success) return false;
   //if (Result == MatchOperand_ParseFail) return true;
 
-  LLVM_DEBUG(dbgs() << ".. Parse Operand: " << getLexer().getTok().getIdentifier() << "\n");
+  //LLVM_DEBUG(dbgs() << ".. Parse Operand: " << getLexer().getTok().getIdentifier() << "\n");
+  LLVM_DEBUG(dbgs() << ".. Parse Operand: ");
+  if (getLexer().is(AsmToken::Integer))
+    LLVM_DEBUG(dbgs() << getLexer().getTok().getAPIntVal() << "\n");
+  else 
+    LLVM_DEBUG(dbgs() << getLexer().getTok().getIdentifier() << "\n");
 
   if (parseRegister(Operands) == MatchOperand_Success) {
     return false;
@@ -313,14 +318,35 @@ OperandMatchResultTy SimpleRISCAsmParser::parseImmediate(OperandVector &Operands
   }
 
   Operands.push_back(SimpleRISCOperand::CreateImmediate(Res, S, E));
+  return MatchOperand_Success;
 }
 
 OperandMatchResultTy SimpleRISCAsmParser::parseOperandWithModifier(OperandVector &Operands) {
-
+  //TODO:
 }
 
 OperandMatchResultTy SimpleRISCAsmParser::parseMemOperand(OperandVector &Operands) {
+  if (getLexer().isNot(AsmToken::LParen)) {
+    Error(getLoc(), "expected (");;
+    return MatchOperand_ParseFail;
+  }
 
+  getLexer().Lex();
+  Operands.push_back(SimpleRISCOperand::CreateToken("(", getLoc()));
+
+  if (parseRegister(Operands) != MatchOperand_Success) {
+    Error(getLoc(), "expected register");
+    return MatchOperand_ParseFail;
+  }
+
+  if (getLexer().isNot(AsmToken::RParen)) {
+    Error(getLoc(), "expected )");;
+    return MatchOperand_ParseFail;
+  }
+
+  getLexer().Lex();
+  Operands.push_back(SimpleRISCOperand::CreateToken(")", getLoc()));
+  return MatchOperand_Success;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSimpleRISCAsmParser() {
