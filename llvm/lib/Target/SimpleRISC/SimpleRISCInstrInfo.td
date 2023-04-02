@@ -101,8 +101,8 @@ let isCall = 1 in
 class JumpAndLink<string instr_asm, RegisterClass RC> :
     SimpleRISC_J<(outs RC:$rd), (ins RC:$rs1), !strconcat(instr_asm, "\t$rd, $rs1"), [], NoItinerary>;
 
-def JA : JumpAndLink<"ja", GPR>;
-
+def JAL : JumpAndLink<"jal", GPR>;
+def : InstAlias<"jal $rs1", (JAL R0, GPR:$rs1)>;
 
 class CBranch<string instr_asm, RegisterClass RC> :
     SimpleRISC_B<(outs), (ins RC:$rs1, brtarget22:$imm), 
@@ -111,4 +111,6 @@ class CBranch<string instr_asm, RegisterClass RC> :
     let isTerminator = 1;
 }
 
-def B : CBranch<"br", GPR>;
+def BR : CBranch<"br", GPR>;
+// TODO:
+//def : Pat<(brcond cond:$rs1, bb:$rs2), (BR cond:$rs1, bb:$rs2)>;

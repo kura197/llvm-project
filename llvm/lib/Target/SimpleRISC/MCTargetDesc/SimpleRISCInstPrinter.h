@@ -36,6 +36,8 @@ public:
   void printOperand(const MCInst *MI, uint64_t &Address, unsigned OpNo, const MCSubtargetInfo &STI, raw_ostream &O);
   void printMemOperand(const MCInst *MI, unsigned OpNum, raw_ostream &O);
   void printRegName(raw_ostream &O, MCRegister Reg) const override;
+
+  void printCustomAliasOperand(const MCInst* MI, uint64_t Address, unsigned OpIdx, unsigned PrintMethodIdx, const MCSubtargetInfo &STI, raw_ostream &O);
 };
 } // namespace llvm
 

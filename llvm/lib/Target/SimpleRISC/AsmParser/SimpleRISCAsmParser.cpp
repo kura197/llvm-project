@@ -180,9 +180,13 @@ struct SimpleRISCOperand final : public MCParsedAsmOperand {
 #include "SimpleRISCGenAsmMatcher.inc"
 
 bool SimpleRISCAsmParser::parseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) {
+  //TODO:
+  return false;
 }
 
 OperandMatchResultTy SimpleRISCAsmParser::tryParseRegister(MCRegister &Reg, SMLoc &StartLoc, SMLoc &EndLoc) {
+  //TODO:
+  return MatchOperand_ParseFail;
 }
 
 bool SimpleRISCAsmParser::ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
@@ -222,11 +226,11 @@ bool SimpleRISCAsmParser::ParseOperand(OperandVector &Operands, StringRef Mnemon
   //if (Result == MatchOperand_ParseFail) return true;
 
   //LLVM_DEBUG(dbgs() << ".. Parse Operand: " << getLexer().getTok().getIdentifier() << "\n");
-  LLVM_DEBUG(dbgs() << ".. Parse Operand: ");
-  if (getLexer().is(AsmToken::Integer))
-    LLVM_DEBUG(dbgs() << getLexer().getTok().getAPIntVal() << "\n");
-  else 
-    LLVM_DEBUG(dbgs() << getLexer().getTok().getIdentifier() << "\n");
+  //LLVM_DEBUG(dbgs() << ".. Parse Operand: ");
+  //if (getLexer().is(AsmToken::Integer))
+  //  LLVM_DEBUG(dbgs() << getLexer().getTok().getAPIntVal() << "\n");
+  //else 
+  //  LLVM_DEBUG(dbgs() << getLexer().getTok().getIdentifier() << "\n");
 
   if (parseRegister(Operands) == MatchOperand_Success) {
     return false;
@@ -244,7 +248,8 @@ bool SimpleRISCAsmParser::ParseOperand(OperandVector &Operands, StringRef Mnemon
 }
 
 bool SimpleRISCAsmParser::ParseDirective(AsmToken DirectiveID) {
-
+  //TODO:
+  return false;
 }
 
 bool SimpleRISCAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
@@ -323,6 +328,7 @@ OperandMatchResultTy SimpleRISCAsmParser::parseImmediate(OperandVector &Operands
 
 OperandMatchResultTy SimpleRISCAsmParser::parseOperandWithModifier(OperandVector &Operands) {
   //TODO:
+  return MatchOperand_ParseFail;
 }
 
 OperandMatchResultTy SimpleRISCAsmParser::parseMemOperand(OperandVector &Operands) {
