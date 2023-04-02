@@ -17,11 +17,14 @@
 
 include "SimpleRISCInstrFormats.td"
 
+
 class ArithLogicR<bits<4> opcode, string instr_asm, SDNode OpNode, RegisterClass RC> :
     SimpleRISC_A<opcode, (outs RC:$rd), (ins RC:$rs1, RC:$rs2),
                  !strconcat(instr_asm, "\t$rd, $rs1, $rs2"),
                  [(set RC:$rd, (OpNode RC:$rs1, RC:$rs2))], NoItinerary> {
     let isReMaterializable = 1;
+    let mayLoad = 0;
+    let mayStore = 0;
 }
 
 def ADD : ArithLogicR<0b0000, "add", add, GPR>;
@@ -32,15 +35,42 @@ def XOR : ArithLogicR<0b0100, "xor", xor, GPR>;
 def SHL : ArithLogicR<0b0101, "shl", shl, GPR>;
 def SHR : ArithLogicR<0b0110, "shr", srl, GPR>;
 
-class SetCC_R<bits<4> opcode, string instr_asm, PatFrag cond_op, RegisterClass RC> :
-    SimpleRISC_A<opcode, (outs RC:$rd), (ins RC:$rs1, RC:$rs2),
+def simm26 : Operand<XLenVT>, ImmLeaf<XLenVT, [{return isInt<26>(Imm);}]> {
+    // add DecoderMethod for dis-assembler
+}
+
+class LoadImm<string instr_asm, RegisterClass RC> :
+    SimpleRISC_I<(outs RC:$rd), (ins simm26:$imm),
+                 !strconcat(instr_asm, "\t$rd, $imm"), [], NoItinerary> {
+    let isReMaterializable = 1;
+    let mayLoad = 0;
+    let mayStore = 0;
+}
+
+def LI : LoadImm<"li", GPR>;
+
+
+class SetCC_R<bits<4> opcode, bits<1> funct1, string instr_asm, PatFrag cond_op, RegisterClass RC> :
+    SimpleRISC_C<opcode, funct1, (outs RC:$rd), (ins RC:$rs1, RC:$rs2),
                  !strconcat(instr_asm, "\t$rd, $rs1, $rs2"),
                  [(set RC:$rd, (cond_op RC:$rs1, RC:$rs2))], NoItinerary> {
     let isReMaterializable = 1;
+    let mayLoad = 0;
+    let mayStore = 0;
 }
 
-// TODO: add sltu
-def SLT : SetCC_R<0b0111, "slt", setlt, GPR>;
+def SLT  : SetCC_R<0b0111, 0b0, "slt",  setlt, GPR>;
+def SLTU : SetCC_R<0b0111, 0b1, "sltu", setult, GPR>;
+
+def : Pat<(seteq GPR:$rs1, GPR:$rs2), (SLTU (XOR GPR:$rs1, GPR:$rs2), (LI 1))>;
+def : Pat<(setne GPR:$rs1, GPR:$rs2), (SLTU (LI 0), (XOR GPR:$rs1, GPR:$rs2))>;
+def : Pat<(setugt GPR:$rs1, GPR:$rs2), (SLTU GPR:$rs2, GPR:$rs1)>;
+def : Pat<(setuge GPR:$rs1, GPR:$rs2), (XOR (SLTU GPR:$rs1, GPR:$rs2), (LI 1))>;
+def : Pat<(setule GPR:$rs1, GPR:$rs2), (XOR (SLTU GPR:$rs2, GPR:$rs1), (LI 1))>;
+def : Pat<(setgt GPR:$rs1, GPR:$rs2), (SLT GPR:$rs2, GPR:$rs1)>;
+def : Pat<(setge GPR:$rs1, GPR:$rs2), (XOR (SLT GPR:$rs1, GPR:$rs2), (LI 1))>;
+def : Pat<(setle GPR:$rs1, GPR:$rs2), (XOR (SLT GPR:$rs2, GPR:$rs1), (LI 1))>;
+
 
 def simm17 : Operand<XLenVT>, ImmLeaf<XLenVT, [{return isInt<17>(Imm);}]> {
     // add DecoderMethod for dis-assembler

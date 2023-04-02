@@ -11,7 +11,7 @@ class InstFormat<bits<3> val> {
 }
 
 def InstFormatA : InstFormat<0>;
-def InstFormatM : InstFormat<1>;
+def InstFormatI : InstFormat<1>;
 def InstFormatB : InstFormat<2>;
 def InstFormatJ : InstFormat<3>;
 def InstFormatL : InstFormat<4>;
@@ -56,7 +56,23 @@ class SimpleRISC_A<bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> p
     let Inst{11-0}  = 0;
 }
 
-class SimpleRISC_M<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+class SimpleRISC_C<bits<4> opcode, bits<1> funct1, dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
+    SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
+
+    bits<5> rd;
+    bits<5> rs1;
+    bits<5> rs2;
+
+    let Inst{31}    = 0;
+    let Inst{30-27} = opcode;
+    let Inst{26-22} = rd;
+    let Inst{21-17} = rs1;
+    let Inst{16-12} = rs2;
+    let Inst{11}    = funct1;
+    let Inst{10-0}  = 0;
+}
+
+class SimpleRISC_I<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
     SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
 
     bits<5> rd;
@@ -68,7 +84,6 @@ class SimpleRISC_M<dag outs, dag ins, string asmstr, list<dag> pattern, InstrIti
     let Inst{21-0}  = simm26{21-0};
 }
 
-// TODO:
 class SimpleRISC_B<dag outs, dag ins, string asmstr, list<dag> pattern, InstrItinClass itin> : 
     SimpleRISCInst<outs, ins, asmstr, pattern, itin, InstFormatA> {
 
