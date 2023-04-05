@@ -12,6 +12,8 @@ add_public_tablegen_target(SimpleRISCCommonTableGen)
 
 add_llvm_target(SimpleRISCCodeGen
   SimpleRISCTargetMachine.cpp
+  SimpleRISCSubtarget.cpp
+  SimpleRISCTargetObjectFile.cpp
   SimpleRISCInstrInfo.cpp
 )
 

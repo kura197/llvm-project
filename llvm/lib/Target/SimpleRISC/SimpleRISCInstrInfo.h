@@ -28,7 +28,7 @@ class SimpleRISCSubtarget;
 class SimpleRISCInstrInfo : public SimpleRISCGenInstrInfo {
 public:
   explicit SimpleRISCInstrInfo(SimpleRISCSubtarget &STI);
-}
+};
 
 }
 

@@ -13,8 +13,8 @@
 #ifndef LLVM_LIB_TARGET_SimpleRISC_SimpleRISCTARGETMACHINE_H
 #define LLVM_LIB_TARGET_SimpleRISC_SimpleRISCTARGETMACHINE_H
 
-//#include "MCTargetDesc/SimpleRISCMCTargetDesc.h"
-//#include "SimpleRISCSubtarget.h"
+#include "MCTargetDesc/SimpleRISCMCTargetDesc.h"
+#include "SimpleRISCSubtarget.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Target/TargetMachine.h"
