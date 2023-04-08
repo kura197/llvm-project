@@ -12,6 +12,7 @@
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
+#include "Arch/SimpleRISC.h"
 #include "Arch/Sparc.h"
 #include "Arch/SystemZ.h"
 #include "CommonArgs.h"
@@ -275,6 +276,8 @@ static const char *getLDMOption(const llvm::Triple &T, const ArgList &Args) {
     return "elf32lriscv";
   case llvm::Triple::riscv64:
     return "elf64lriscv";
+  case llvm::Triple::simplerisc:
+    return "elf32_simplerisc";
   case llvm::Triple::sparc:
   case llvm::Triple::sparcel:
     return "elf32_sparc";
@@ -791,6 +794,18 @@ void tools::gnutools::Assembler::ConstructJob(Compilation &C,
     CmdArgs.push_back(MArchName.data());
     if (!Args.hasFlag(options::OPT_mrelax, options::OPT_mno_relax, true))
       Args.addOptOutFlag(CmdArgs, options::OPT_mrelax, options::OPT_mno_relax);
+    break;
+  }
+  case llvm::Triple::simplerisc: {
+    //TODO:
+    StringRef ABIName = simplerisc::getSimpleRISCABI(Args, getToolChain().getTriple());
+    CmdArgs.push_back("-mabi");
+    CmdArgs.push_back(ABIName.data());
+    if (const Arg *A = Args.getLastArg(options::OPT_march_EQ)) {
+      StringRef MArch = A->getValue();
+      CmdArgs.push_back("-march");
+      CmdArgs.push_back(MArch.data());
+    }
     break;
   }
   case llvm::Triple::sparc:
@@ -1772,6 +1787,28 @@ static void findRISCVMultilibs(const Driver &D,
     Result.Multilibs = RISCVMultilibs;
 }
 
+//TODO:
+static void findSimpleRISCMultilibs(const Driver &D,
+                                    const llvm::Triple &TargetTriple, StringRef Path,
+                                    const ArgList &Args, DetectedMultilibs &Result) {
+
+  FilterNonExistent NonExistent(Path, "/crtbegin.o", D.getVFS());
+  Multilib Ilp32 = makeMultilib("lib32/ilp32").flag("+m32").flag("+mabi=ilp32");
+  MultilibSet SimpleRISCMultilibs =
+      MultilibSet()
+          .Either({Ilp32})
+          .FilterOut(NonExistent);
+
+  Multilib::flags_list Flags;
+  StringRef ABIName = tools::simplerisc::getSimpleRISCABI(Args, TargetTriple);
+
+  addMultilibFlag(true, "m32", Flags);
+  addMultilibFlag(ABIName == "ilp32", "mabi=ilp32", Flags);
+
+  if (SimpleRISCMultilibs.select(Flags, Result.SelectedMultilib))
+    Result.Multilibs = SimpleRISCMultilibs;
+}
+
 static bool findBiarchMultilibs(const Driver &D,
                                 const llvm::Triple &TargetTriple,
                                 StringRef Path, const ArgList &Args,
@@ -2326,6 +2363,9 @@ void Generic_GCC::GCCInstallationDetector::AddDefaultGCCPrefixes(
                                                "riscv64-linux-gnu",
                                                "riscv64-unknown-elf"};
 
+  static const char *const SimpleRISCLibDirs[] = {"/lib32", "/lib"};
+  static const char *const SimpleRISCTriples[] = {"simplerisc-unknown-linux-gnu"};
+
   static const char *const SPARCv8LibDirs[] = {"/lib32", "/lib"};
   static const char *const SPARCv8Triples[] = {"sparc-linux-gnu",
                                                "sparcv8-linux-gnu"};
@@ -2593,6 +2633,10 @@ void Generic_GCC::GCCInstallationDetector::AddDefaultGCCPrefixes(
     BiarchLibDirs.append(begin(RISCV32LibDirs), end(RISCV32LibDirs));
     BiarchTripleAliases.append(begin(RISCV32Triples), end(RISCV32Triples));
     break;
+  case llvm::Triple::simplerisc:
+    LibDirs.append(begin(SimpleRISCLibDirs), end(SimpleRISCLibDirs));
+    TripleAliases.append(begin(SimpleRISCTriples), end(SimpleRISCTriples));
+    break;
   case llvm::Triple::sparc:
   case llvm::Triple::sparcel:
     LibDirs.append(begin(SPARCv8LibDirs), end(SPARCv8LibDirs));
@@ -2644,6 +2688,8 @@ bool Generic_GCC::GCCInstallationDetector::ScanGCCForMultilibs(
       return false;
   } else if (TargetTriple.isRISCV()) {
     findRISCVMultilibs(D, TargetTriple, Path, Args, Detected);
+  } else if (TargetTriple.isSimpleRISC()) {
+    findSimpleRISCMultilibs(D, TargetTriple, Path, Args, Detected);
   } else if (isMSP430(TargetArch)) {
     findMSP430Multilibs(D, TargetTriple, Path, Args, Detected);
   } else if (TargetArch == llvm::Triple::avr) {
@@ -2917,6 +2963,7 @@ bool Generic_GCC::IsIntegratedAssemblerDefault() const {
   case llvm::Triple::r600:
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
+  case llvm::Triple::simplerisc:
   case llvm::Triple::sparc:
   case llvm::Triple::sparcel:
   case llvm::Triple::sparcv9:

@@ -10971,6 +10971,174 @@ static bool getTypeString(SmallStringEnc &Enc, const Decl *D,
 }
 
 //===----------------------------------------------------------------------===//
+// SimpleRISC ABI Implementation
+//===----------------------------------------------------------------------===//
+
+namespace {
+class SimpleRISCABIInfo : public DefaultABIInfo {
+private:
+  unsigned XLen = 32; // Size of the integer ('x') registers in bits.
+  static const int NumArgGPRs = 4;
+
+public:
+  SimpleRISCABIInfo(CodeGen::CodeGenTypes &CGT, unsigned XLen)
+      : DefaultABIInfo(CGT), XLen(XLen) {}
+
+  // DefaultABIInfo's classifyReturnType and classifyArgumentType are
+  // non-virtual, but computeInfo is virtual, so we overload it.
+  void computeInfo(CGFunctionInfo &FI) const override;
+
+  ABIArgInfo classifyArgumentType(QualType Ty, bool IsFixed,
+                                  int &ArgGPRsLeft) const;
+  ABIArgInfo classifyReturnType(QualType RetTy) const;
+
+  Address EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                    QualType Ty) const override;
+
+  ABIArgInfo extendType(QualType Ty) const;
+};
+} // end anonymous namespace
+
+void SimpleRISCABIInfo::computeInfo(CGFunctionInfo &FI) const {
+  QualType RetTy = FI.getReturnType();
+  if (!getCXXABI().classifyReturnType(FI))
+    FI.getReturnInfo() = classifyReturnType(RetTy);
+
+  bool IsRetIndirect = FI.getReturnInfo().getKind() == ABIArgInfo::Indirect ||
+                       getContext().getTypeSize(RetTy) > 2*XLen;
+
+  // TODO:
+  int ArgGPRsLeft = IsRetIndirect ? NumArgGPRs - 1 : NumArgGPRs;
+  int NumFixedArgs = FI.getNumRequiredArgs();
+
+  int ArgNum = 0;
+  for (auto &ArgInfo : FI.arguments()) {
+    bool IsFixed = ArgNum < NumFixedArgs;
+    ArgInfo.info = classifyArgumentType(ArgInfo.type, IsFixed, ArgGPRsLeft);
+    ArgNum++;
+  }
+}
+
+// TODO:
+ABIArgInfo SimpleRISCABIInfo::classifyArgumentType(QualType Ty, bool IsFixed,
+                                              int &ArgGPRsLeft) const {
+  assert(ArgGPRsLeft <= NumArgGPRs && "Arg GPR tracking underflow");
+  Ty = useFirstFieldIfTransparentUnion(Ty);
+
+  // Structures with either a non-trivial destructor or a non-trivial
+  // copy constructor are always passed indirectly.
+  if (CGCXXABI::RecordArgABI RAA = getRecordArgABI(Ty, getCXXABI())) {
+    if (ArgGPRsLeft)
+      ArgGPRsLeft -= 1;
+    return getNaturalAlignIndirect(Ty, /*ByVal=*/RAA ==
+                                           CGCXXABI::RAA_DirectInMemory);
+  }
+
+  // Ignore empty structs/unions.
+  if (isEmptyRecord(getContext(), Ty, true))
+    return ABIArgInfo::getIgnore();
+
+  uint64_t Size = getContext().getTypeSize(Ty);
+  uint64_t NeededAlign = getContext().getTypeAlign(Ty);
+  bool MustUseStack = false;
+  // Determine the number of GPRs needed to pass the current argument
+  // according to the ABI. 2*XLen-aligned varargs are passed in "aligned"
+  // register pairs, so may consume 3 registers.
+  int NeededArgGPRs = 1;
+  if (!IsFixed && NeededAlign == 2 * XLen)
+    NeededArgGPRs = 2 + (ArgGPRsLeft % 2);
+  else if (Size > XLen && Size <= 2 * XLen)
+    NeededArgGPRs = 2;
+
+  if (NeededArgGPRs > ArgGPRsLeft) {
+    MustUseStack = true;
+    NeededArgGPRs = ArgGPRsLeft;
+  }
+
+  ArgGPRsLeft -= NeededArgGPRs;
+
+  if (!isAggregateTypeForABI(Ty) && !Ty->isVectorType()) {
+    // Treat an enum type as its underlying type.
+    if (const EnumType *EnumTy = Ty->getAs<EnumType>())
+      Ty = EnumTy->getDecl()->getIntegerType();
+
+    // All integral types are promoted to XLen width, unless passed on the
+    // stack.
+    if (Size < XLen && Ty->isIntegralOrEnumerationType() && !MustUseStack) {
+      return extendType(Ty);
+    }
+
+    return ABIArgInfo::getDirect();
+  }
+
+  // Aggregates which are <= 2*XLen will be passed in registers if possible,
+  // so coerce to integers.
+  if (Size <= 2 * XLen) {
+    unsigned Alignment = getContext().getTypeAlign(Ty);
+
+    // Use a single XLen int if possible, 2*XLen if 2*XLen alignment is
+    // required, and a 2-element XLen array if only XLen alignment is required.
+    if (Size <= XLen) {
+      return ABIArgInfo::getDirect(
+          llvm::IntegerType::get(getVMContext(), XLen));
+    } else if (Alignment == 2 * XLen) {
+      return ABIArgInfo::getDirect(
+          llvm::IntegerType::get(getVMContext(), 2 * XLen));
+    } else {
+      return ABIArgInfo::getDirect(llvm::ArrayType::get(
+          llvm::IntegerType::get(getVMContext(), XLen), 2));
+    }
+  }
+  return getNaturalAlignIndirect(Ty, /*ByVal=*/false);
+}
+
+ABIArgInfo SimpleRISCABIInfo::classifyReturnType(QualType RetTy) const {
+  if (RetTy->isVoidType())
+    return ABIArgInfo::getIgnore();
+
+  int ArgGPRsLeft = 2;
+
+  // The rules for return and argument types are the same, so defer to
+  // classifyArgumentType.
+  return classifyArgumentType(RetTy, /*IsFixed=*/true, ArgGPRsLeft);
+}
+
+//TODO:
+Address SimpleRISCABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                QualType Ty) const {
+  //CharUnits SlotSize = CharUnits::fromQuantity(XLen / 8);
+  CharUnits SlotSize = CharUnits::fromQuantity(XLen / 4);
+
+  // Empty records are ignored for parameter passing purposes.
+  if (isEmptyRecord(getContext(), Ty, true)) {
+    Address Addr = Address(CGF.Builder.CreateLoad(VAListAddr), 
+                          getVAListElementType(CGF), SlotSize);
+    Addr = CGF.Builder.CreateElementBitCast(Addr, CGF.ConvertTypeForMem(Ty));
+    return Addr;
+  }
+
+  auto TInfo = getContext().getTypeInfoInChars(Ty);
+
+  // Arguments bigger than 2*Xlen bytes are passed indirectly.
+  bool IsIndirect = TInfo.Width > 2 * SlotSize;
+
+  return emitVoidPtrVAArg(CGF, VAListAddr, Ty, IsIndirect, TInfo,
+                          SlotSize, /*AllowHigherAlign=*/true);
+}
+
+ABIArgInfo SimpleRISCABIInfo::extendType(QualType Ty) const {
+  return ABIArgInfo::getExtend(Ty);
+}
+
+namespace {
+class SimpleRISCTargetCodeGenInfo : public TargetCodeGenInfo {
+public:
+  SimpleRISCTargetCodeGenInfo(CodeGen::CodeGenTypes &CGT, unsigned XLen)
+      : TargetCodeGenInfo(std::make_unique<SimpleRISCABIInfo>(CGT, XLen)) {}
+};
+} // namespace
+
+//===----------------------------------------------------------------------===//
 // RISCV ABI Implementation
 //===----------------------------------------------------------------------===//
 

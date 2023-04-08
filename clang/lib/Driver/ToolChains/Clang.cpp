@@ -16,6 +16,7 @@
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
+#include "Arch/SimpleRISC.h"
 #include "Arch/Sparc.h"
 #include "Arch/SystemZ.h"
 #include "Arch/VE.h"
@@ -450,6 +451,7 @@ static bool useFramePointerForTargetByDefault(const ArgList &Args,
   case llvm::Triple::ppc64le:
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
+  case llvm::Triple::simplerisc:
   case llvm::Triple::sparc:
   case llvm::Triple::sparcel:
   case llvm::Triple::sparcv9:
@@ -1413,6 +1415,7 @@ static bool isSignedCharDefault(const llvm::Triple &Triple) {
   case llvm::Triple::ppc64le:
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
+  case llvm::Triple::simplerisc:
   case llvm::Triple::systemz:
   case llvm::Triple::xcore:
     return false;
@@ -1712,6 +1715,10 @@ void Clang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
     AddRISCVTargetArgs(Args, CmdArgs);
+    break;
+
+  case llvm::Triple::simplerisc:
+    AddSimpleRISCTargetArgs(Args, CmdArgs);
     break;
 
   case llvm::Triple::sparc:
@@ -2153,6 +2160,13 @@ void Clang::AddRISCVTargetArgs(const ArgList &Args,
           << A->getSpelling() << Val;
     }
   }
+}
+
+void Clang::AddSimpleRISCTargetArgs(const ArgList &Args,
+                                    ArgStringList &CmdArgs) const {
+  const char* ABIName = "ilp32";
+  CmdArgs.push_back("-target-abi");
+  CmdArgs.push_back(ABIName);
 }
 
 void Clang::AddSparcTargetArgs(const ArgList &Args,
@@ -7924,6 +7938,15 @@ void ClangAs::AddRISCVTargetArgs(const ArgList &Args,
                                ArgStringList &CmdArgs) const {
   const llvm::Triple &Triple = getToolChain().getTriple();
   StringRef ABIName = riscv::getRISCVABI(Args, Triple);
+
+  CmdArgs.push_back("-target-abi");
+  CmdArgs.push_back(ABIName.data());
+}
+
+void ClangAs::AddSimpleRISCTargetArgs(const ArgList &Args,
+                                      ArgStringList &CmdArgs) const {
+  const llvm::Triple &Triple = getToolChain().getTriple();
+  StringRef ABIName = simplerisc::getSimpleRISCABI(Args, Triple);
 
   CmdArgs.push_back("-target-abi");
   CmdArgs.push_back(ABIName.data());

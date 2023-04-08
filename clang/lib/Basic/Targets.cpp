@@ -33,6 +33,7 @@
 #include "Targets/PNaCl.h"
 #include "Targets/PPC.h"
 #include "Targets/RISCV.h"
+#include "Targets/SimpleRISC.h"
 #include "Targets/SPIR.h"
 #include "Targets/Sparc.h"
 #include "Targets/SystemZ.h"
@@ -426,6 +427,15 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
       return new LinuxTargetInfo<RISCV64TargetInfo>(Triple, Opts);
     default:
       return new RISCV64TargetInfo(Triple, Opts);
+    }
+
+  case llvm::Triple::simplerisc:
+    // TODO: check
+    switch (os) {
+    case llvm::Triple::Linux:
+      return new LinuxTargetInfo<SimpleRISCTargetInfo>(Triple, Opts);
+    default:
+      return new SimpleRISCTargetInfo(Triple, Opts);
     }
 
   case llvm::Triple::sparc:

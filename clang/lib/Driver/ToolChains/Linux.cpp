@@ -12,6 +12,7 @@
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
+#include "Arch/SimpleRISC.h"
 #include "CommonArgs.h"
 #include "clang/Config/config.h"
 #include "clang/Driver/Distro.h"
@@ -175,6 +176,9 @@ static StringRef getOSLibDir(const llvm::Triple &Triple, const ArgList &Args) {
   if (Triple.getArch() == llvm::Triple::riscv32)
     return "lib32";
 
+  if (Triple.getArch() == llvm::Triple::simplerisc)
+    return "lib32";
+
   return Triple.isArch32Bit() ? "lib" : "lib64";
 }
 
@@ -224,6 +228,7 @@ Linux::Linux(const Driver &D, const llvm::Triple &Triple, const ArgList &Args)
   const bool IsMips = Triple.isMIPS();
   const bool IsHexagon = Arch == llvm::Triple::hexagon;
   const bool IsRISCV = Triple.isRISCV();
+  const bool IsSimpleRISC = Triple.isSimpleRISC();
   const bool IsCSKY = Triple.isCSKY();
 
   if (IsCSKY)
@@ -295,6 +300,13 @@ Linux::Linux(const Driver &D, const llvm::Triple &Triple, const ArgList &Args)
     addPathIfExists(D, concat(SysRoot, "/usr/lib/..", OSLibDir), Paths);
   if (IsRISCV) {
     StringRef ABIName = tools::riscv::getRISCVABI(Args, Triple);
+    addPathIfExists(D, concat(SysRoot, "/", OSLibDir, ABIName), Paths);
+    addPathIfExists(D, concat(SysRoot, "/usr", OSLibDir, ABIName), Paths);
+  }
+
+  // TODO:
+  if (IsSimpleRISC) {
+    StringRef ABIName = tools::simplerisc::getSimpleRISCABI(Args, Triple);
     addPathIfExists(D, concat(SysRoot, "/", OSLibDir, ABIName), Paths);
     addPathIfExists(D, concat(SysRoot, "/usr", OSLibDir, ABIName), Paths);
   }
@@ -534,6 +546,13 @@ std::string Linux::getDynamicLinker(const ArgList &Args) const {
     StringRef ABIName = tools::riscv::getRISCVABI(Args, Triple);
     LibDir = "lib";
     Loader = ("ld-linux-riscv64-" + ABIName + ".so.1").str();
+    break;
+  }
+  // TODO:
+  case llvm::Triple::simplerisc: {
+    StringRef ABIName = tools::riscv::getRISCVABI(Args, Triple);
+    LibDir = "lib";
+    Loader = ("ld-linux-simplerisc32-" + ABIName + ".so.1").str();
     break;
   }
   case llvm::Triple::sparc:
