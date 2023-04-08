@@ -12,6 +12,7 @@ def R32 : HwMode<"+32bit">;
 
 include "SimpleRISCRegisterInfo.td"
 include "SimpleRISCInstrInfo.td"
+include "SimpleRISCCallingConv.td"
 
 def SimpleRISCInstrInfo : InstrInfo {
 }

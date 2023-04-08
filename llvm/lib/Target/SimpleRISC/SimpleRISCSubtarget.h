@@ -13,7 +13,7 @@
 #ifndef LLVM_LIB_TARGET_SimpleRISC_SimpleRISCSUBTARGET_H
 #define LLVM_LIB_TARGET_SimpleRISC_SimpleRISCSUBTARGET_H
 
-//#include "MCTargetDesc/SimpleRISCBaseInfo.h"
+#include "MCTargetDesc/SimpleRISCBaseInfo.h"
 //#include "SimpleRISCFrameLowering.h"
 //#include "SimpleRISCISelLowering.h"
 #include "SimpleRISCInstrInfo.h"
@@ -38,9 +38,12 @@ public:
 private:
   virtual void anchor();
 
-//#define GET_SUBTARGETINFO_MACRO(ATTRIBUTE, DEFAULT, GETTER) \
-//  bool ATTRIBUTE = DEFAULT;
-//#include "SimpleRISCGenSubtargetInfo.inc"
+#define GET_SUBTARGETINFO_MACRO(ATTRIBUTE, DEFAULT, GETTER) \
+  bool ATTRIBUTE = DEFAULT;
+#include "SimpleRISCGenSubtargetInfo.inc"
+
+  unsigned XLen = 32;
+  SimpleRISCABI::ABI TargetABI = SimpleRISCABI::ABI_Unknown;
 
   /// Initializes using the passed in CPU and feature strings so that we can
   /// use initializer lists for subtarget initialization.
@@ -49,6 +52,8 @@ private:
                                                   StringRef TuneCPU,
                                                   StringRef FS,
                                                   StringRef ABIName);
+
+  void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
 
 public:
   // Initializes the data members to match that of the specified triple.
