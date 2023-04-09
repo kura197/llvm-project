@@ -29,6 +29,8 @@ struct SimpleRISCRegisterInfo : public SimpleRISCGenRegisterInfo {
 
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
 
+  const uint32_t *getCalleeSavedMask(const MachineFunction *MF, CallingConv::ID) const;
+
   BitVector getReservedRegs(const MachineFunction &MF) const override;
   bool isAsmClobberable(const MachineFunction &MF,
                         MCRegister PhysReg) const override;

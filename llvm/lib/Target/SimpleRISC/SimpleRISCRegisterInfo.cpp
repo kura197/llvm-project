@@ -14,6 +14,7 @@
 #include "SimpleRISC.h"
 //#include "SimpleRISCMachineFunctionInfo.h"
 #include "SimpleRISCSubtarget.h"
+#include "SimpleRISCFrameLowering.h"
 #include "llvm/BinaryFormat/Dwarf.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
