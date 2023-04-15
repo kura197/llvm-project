@@ -17,6 +17,14 @@
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
+    class SimpleRISCTargetMachine;
+    class MCInst;
+    class MachineInstr;
+    class FunctionPass;
+
+    void LowerSimpleRISCMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI);
+
+    FunctionPass *createSimpleRISCISelDag(SimpleRISCTargetMachine &TM, CodeGenOpt::Level OptLevel);
 } // namespace llvm
 
 #endif

@@ -36,6 +36,8 @@ public:
     return TLOF.get();
   }
 
+  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+
 };
 } // namespace llvm
 

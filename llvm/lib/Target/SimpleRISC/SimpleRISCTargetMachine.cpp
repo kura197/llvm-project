@@ -15,6 +15,7 @@
 #include "SimpleRISCTargetObjectFile.h"
 #include "TargetInfo/SimpleRISCTargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
 
 using namespace llvm;
 
@@ -41,4 +42,27 @@ SimpleRISCTargetMachine::SimpleRISCTargetMachine(const Target &T, const Triple &
         //DefaultSubtarget(TT, CPU, CPU, FS, *this) {
     initAsmInfo();
 }
-     
+
+
+namespace {
+    class SimpleRISCPassConfig : public TargetPassConfig {
+        public:
+        SimpleRISCPassConfig(SimpleRISCTargetMachine &TM, PassManagerBase &PM)
+            : TargetPassConfig(TM, PM) {}
+
+        SimpleRISCTargetMachine &getSimpleRISCTargetMachine() const {
+            return getTM<SimpleRISCTargetMachine>();
+        }
+
+        bool addInstSelector() override;
+    };
+}
+
+TargetPassConfig *SimpleRISCTargetMachine::createPassConfig(PassManagerBase &PM) {
+    return new SimpleRISCPassConfig(*this, PM);
+}
+
+bool SimpleRISCPassConfig::addInstSelector() {
+    addPass(createSimpleRISCISelDag(getSimpleRISCTargetMachine(), getOptLevel()));
+    return false;
+}

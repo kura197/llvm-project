@@ -19,6 +19,8 @@ add_llvm_target(SimpleRISCCodeGen
   SimpleRISCRegisterInfo.cpp
   SimpleRISCISelLowering.cpp
   SimpleRISCFrameLowering.cpp
+  SimpleRISCISelDAGToDAG.cpp
+  SimpleRISCAsmPrinter.cpp
 )
 
 add_subdirectory(AsmParser)
