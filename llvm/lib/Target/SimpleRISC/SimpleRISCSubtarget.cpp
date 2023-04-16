@@ -48,12 +48,10 @@ SimpleRISCSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef
   return *this;
 }
 
-SimpleRISCSubtarget::SimpleRISCSubtarget(const Triple &TT, StringRef CPU,
-                                         StringRef TuneCPU, StringRef FS,
-                                         StringRef ABIName, unsigned RVVVectorBitsMin,
-                                         unsigned RVVVectorBitsMax,
-                                         const TargetMachine &TM)
-    : SimpleRISCGenSubtargetInfo(TT, CPU, TuneCPU, FS) {
+SimpleRISCSubtarget::SimpleRISCSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU, 
+                                         StringRef FS, const TargetMachine &TM)
+    : SimpleRISCGenSubtargetInfo(TT, CPU, TuneCPU, FS),
+      InstrInfo(*this), RegInfo(getHwMode()), TLInfo(TM, *this) {
     //: SimpleRISCGenSubtargetInfo(TT, CPU, TuneCPU, FS),
     //  FrameLowering(initializeSubtargetDependencies(TT, CPU, TuneCPU, FS, ABIName)),
     //  InstrInfo(*this), RegInfo(getHwMode()), TLInfo(TM, *this) {

@@ -26,6 +26,9 @@ namespace llvm {
 class SimpleRISCSubtarget;
 
 class SimpleRISCInstrInfo : public SimpleRISCGenInstrInfo {
+protected:
+  const SimpleRISCSubtarget &STI;
+
 public:
   explicit SimpleRISCInstrInfo(SimpleRISCSubtarget &STI);
 };

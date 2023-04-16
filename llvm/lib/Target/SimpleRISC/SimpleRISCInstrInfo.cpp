@@ -18,5 +18,5 @@ using namespace llvm;
 #define GET_INSTRINFO_NAMED_OPS
 #include "SimpleRISCGenInstrInfo.inc"
 
-//SimpleRISCInstrInfo::SimpleRISCInstrInfo(SimpleRISCSubtarget &STI) 
-//  : SimpleRISCGenInstrInfo(), STI(STI) {}
+SimpleRISCInstrInfo::SimpleRISCInstrInfo(SimpleRISCSubtarget &STI) 
+  : SimpleRISCGenInstrInfo(), STI(STI) {}

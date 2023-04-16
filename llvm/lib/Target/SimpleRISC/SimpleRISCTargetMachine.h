@@ -24,6 +24,7 @@ namespace llvm {
 class SimpleRISCTargetMachine : public LLVMTargetMachine {
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
   mutable StringMap<std::unique_ptr<SimpleRISCSubtarget>> SubtargetMap;
+  SimpleRISCSubtarget DefaultSubtarget;
 
 public:
   SimpleRISCTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
@@ -37,6 +38,8 @@ public:
   }
 
   TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+
+  const SimpleRISCSubtarget *getSubtargetImpl(const Function &F) const override;
 
 };
 } // namespace llvm

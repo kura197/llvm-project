@@ -62,3 +62,8 @@ bool SimpleRISCRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
                                                  RegScavenger *RS) const {
   return false;
 }
+
+Register SimpleRISCRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
+  // return SP
+  return SimpleRISC::R1;
+}

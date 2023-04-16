@@ -15,8 +15,9 @@
 
 #include "MCTargetDesc/SimpleRISCBaseInfo.h"
 //#include "SimpleRISCFrameLowering.h"
-//#include "SimpleRISCISelLowering.h"
+#include "SimpleRISCISelLowering.h"
 #include "SimpleRISCInstrInfo.h"
+#include "SimpleRISCRegisterInfo.h"
 #include "llvm/CodeGen/GlobalISel/CallLowering.h"
 #include "llvm/CodeGen/GlobalISel/InstructionSelector.h"
 #include "llvm/CodeGen/GlobalISel/LegalizerInfo.h"
@@ -44,23 +45,28 @@ private:
 
   unsigned XLen = 32;
   SimpleRISCABI::ABI TargetABI = SimpleRISCABI::ABI_Unknown;
+  SimpleRISCInstrInfo InstrInfo;
+  SimpleRISCRegisterInfo RegInfo;
+  SimpleRISCTargetLowering TLInfo;
 
   /// Initializes using the passed in CPU and feature strings so that we can
   /// use initializer lists for subtarget initialization.
   SimpleRISCSubtarget &initializeSubtargetDependencies(const Triple &TT,
-                                                  StringRef CPU,
-                                                  StringRef TuneCPU,
-                                                  StringRef FS,
-                                                  StringRef ABIName);
+                                                       StringRef CPU,
+                                                       StringRef TuneCPU,
+                                                       StringRef FS,
+                                                       StringRef ABIName);
 
   void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
 
 public:
   // Initializes the data members to match that of the specified triple.
-  SimpleRISCSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU,
-                 StringRef FS, StringRef ABIName, unsigned RVVVectorBitsMin,
-                 unsigned RVVVectorLMULMax, const TargetMachine &TM);
+  SimpleRISCSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU, 
+                      StringRef FS, const TargetMachine &TM);
 
+  const SimpleRISCInstrInfo *getInstrInfo() const override { return &InstrInfo; };
+  const SimpleRISCRegisterInfo *getRegisterInfo() const override { return &RegInfo; };
+  const SimpleRISCTargetLowering *getTargetLowering() const override { return &TLInfo; };
 };
 } // End llvm namespace
 

@@ -37,9 +37,9 @@ SimpleRISCTargetMachine::SimpleRISCTargetMachine(const Target &T, const Triple &
                     std::optional<CodeModel::Model> CM, CodeGenOpt::Level OL, bool JIT) : 
         LLVMTargetMachine(T, computeDataLayout(TT), TT, CPU, FS, Options,
                           getEffectiveRelocModel(RM), getEffectiveCodeModel(CM, CodeModel::Small), OL),
-        TLOF(std::make_unique<SimpleRISCELFTargetObjectFile>()) {
+        TLOF(std::make_unique<SimpleRISCELFTargetObjectFile>()),
         //ABI(SimpleRISCABIInfo::computeTargetABI(Options.MCOptions.getABIName())),
-        //DefaultSubtarget(TT, CPU, CPU, FS, *this) {
+        DefaultSubtarget(TT, CPU, CPU, FS, *this) {
     initAsmInfo();
 }
 
@@ -65,4 +65,8 @@ TargetPassConfig *SimpleRISCTargetMachine::createPassConfig(PassManagerBase &PM)
 bool SimpleRISCPassConfig::addInstSelector() {
     addPass(createSimpleRISCISelDag(getSimpleRISCTargetMachine(), getOptLevel()));
     return false;
+}
+
+const SimpleRISCSubtarget *SimpleRISCTargetMachine::getSubtargetImpl(const Function &F) const {
+    return &DefaultSubtarget;
 }

@@ -30,7 +30,7 @@ class SimpleRISCTargetLowering : public TargetLowering {
 
 public:
   explicit SimpleRISCTargetLowering(const TargetMachine &TM,
-                               const SimpleRISCSubtarget &STI);
+                                    const SimpleRISCSubtarget &STI);
 
   const SimpleRISCSubtarget &getSubtarget() const { return Subtarget; }
 
