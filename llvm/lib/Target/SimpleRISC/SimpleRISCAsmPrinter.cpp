@@ -52,33 +52,18 @@ public:
 
   StringRef getPassName() const override { return "SimpleRISC Assembly Printer"; }
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
-
   void emitInstruction(const MachineInstr *MI) override;
-
-  bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
-                       const char *ExtraCode, raw_ostream &OS) override;
-  bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
-                             const char *ExtraCode, raw_ostream &OS) override;
-
-  void EmitToStreamer(MCStreamer &S, const MCInst &Inst);
-  bool emitPseudoExpansionLowering(MCStreamer &OutStreamer,
-                                   const MachineInstr *MI);
 
   // Wrapper needed for tblgenned pseudo lowering.
   bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const {
     //TODO:
     //return lowerSimpleRISCMachineOperandToMCOperand(MO, MCOp, *this);
   }
-
-  void emitStartOfAsmFile(Module &M) override;
-  void emitEndOfAsmFile(Module &M) override;
-
-  void emitFunctionEntryLabel() override;
-
-private:
-  void emitAttributes();
 };
+}
+
+void SimpleRISCAsmPrinter::emitInstruction(const MachineInstr *MI) {
+
 }
 
 // Force static initialization.
