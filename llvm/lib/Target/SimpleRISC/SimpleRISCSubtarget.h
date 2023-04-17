@@ -14,7 +14,7 @@
 #define LLVM_LIB_TARGET_SimpleRISC_SimpleRISCSUBTARGET_H
 
 #include "MCTargetDesc/SimpleRISCBaseInfo.h"
-//#include "SimpleRISCFrameLowering.h"
+#include "SimpleRISCFrameLowering.h"
 #include "SimpleRISCISelLowering.h"
 #include "SimpleRISCInstrInfo.h"
 #include "SimpleRISCRegisterInfo.h"
@@ -45,6 +45,7 @@ private:
 
   unsigned XLen = 32;
   SimpleRISCABI::ABI TargetABI = SimpleRISCABI::ABI_Unknown;
+  SimpleRISCFrameLowering FrameLowering;
   SimpleRISCInstrInfo InstrInfo;
   SimpleRISCRegisterInfo RegInfo;
   SimpleRISCTargetLowering TLInfo;
@@ -62,8 +63,9 @@ private:
 public:
   // Initializes the data members to match that of the specified triple.
   SimpleRISCSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU, 
-                      StringRef FS, const TargetMachine &TM);
+                      StringRef FS, StringRef ABIName, const TargetMachine &TM);
 
+  const SimpleRISCFrameLowering *getFrameLowering() const override { return &FrameLowering; };
   const SimpleRISCInstrInfo *getInstrInfo() const override { return &InstrInfo; };
   const SimpleRISCRegisterInfo *getRegisterInfo() const override { return &RegInfo; };
   const SimpleRISCTargetLowering *getTargetLowering() const override { return &TLInfo; };

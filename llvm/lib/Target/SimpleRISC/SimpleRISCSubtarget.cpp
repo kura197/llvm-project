@@ -49,12 +49,10 @@ SimpleRISCSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef
 }
 
 SimpleRISCSubtarget::SimpleRISCSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU, 
-                                         StringRef FS, const TargetMachine &TM)
+                                         StringRef FS, StringRef ABIName, const TargetMachine &TM)
     : SimpleRISCGenSubtargetInfo(TT, CPU, TuneCPU, FS),
+      FrameLowering(initializeSubtargetDependencies(TT, CPU, TuneCPU, FS, ABIName)),
       InstrInfo(*this), RegInfo(getHwMode()), TLInfo(TM, *this) {
-    //: SimpleRISCGenSubtargetInfo(TT, CPU, TuneCPU, FS),
-    //  FrameLowering(initializeSubtargetDependencies(TT, CPU, TuneCPU, FS, ABIName)),
-    //  InstrInfo(*this), RegInfo(getHwMode()), TLInfo(TM, *this) {
   //if (SimpleRISC::isX18ReservedByDefault(TT))
   //  UserReservedRegister.set(SimpleRISC::X18);
 

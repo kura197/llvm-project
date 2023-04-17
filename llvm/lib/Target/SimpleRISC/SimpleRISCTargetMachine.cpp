@@ -32,14 +32,14 @@ static Reloc::Model getEffectiveRelocModel(std::optional<Reloc::Model> RM) {
 }
 
 SimpleRISCTargetMachine::SimpleRISCTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                    StringRef FS, const TargetOptions &Options,
-                    std::optional<Reloc::Model> RM,
-                    std::optional<CodeModel::Model> CM, CodeGenOpt::Level OL, bool JIT) : 
+                                                 StringRef FS, const TargetOptions &Options,
+                                                 std::optional<Reloc::Model> RM,
+                                                 std::optional<CodeModel::Model> CM, 
+                                                 CodeGenOpt::Level OL, bool JIT) : 
         LLVMTargetMachine(T, computeDataLayout(TT), TT, CPU, FS, Options,
                           getEffectiveRelocModel(RM), getEffectiveCodeModel(CM, CodeModel::Small), OL),
         TLOF(std::make_unique<SimpleRISCELFTargetObjectFile>()),
-        //ABI(SimpleRISCABIInfo::computeTargetABI(Options.MCOptions.getABIName())),
-        DefaultSubtarget(TT, CPU, CPU, FS, *this) {
+        DefaultSubtarget(TT, CPU, CPU, FS, Options.MCOptions.getABIName(), *this) {
     initAsmInfo();
 }
 

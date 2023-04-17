@@ -30,6 +30,7 @@ public:
 
   void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
   void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  bool hasFP(const MachineFunction &MF) const override;
 
 protected:
   const SimpleRISCSubtarget &STI;

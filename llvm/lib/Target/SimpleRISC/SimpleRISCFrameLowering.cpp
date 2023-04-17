@@ -35,3 +35,13 @@ void SimpleRISCFrameLowering::emitPrologue(MachineFunction &MF, MachineBasicBloc
 void SimpleRISCFrameLowering::emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const {
 
 }
+
+bool SimpleRISCFrameLowering::hasFP(const MachineFunction &MF) const {
+    //TODO:
+    const MachineFrameInfo &MFI = MF.getFrameInfo();
+    const TargetRegisterInfo *TRI = STI.getRegisterInfo();
+
+    return MF.getTarget().Options.DisableFramePointerElim(MF) ||
+           MFI.hasVarSizedObjects() || MFI.isFrameAddressTaken() ||
+           TRI->hasStackRealignment(MF);
+}
