@@ -19,6 +19,10 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/TargetParser.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
+
+#define DEBUG_TYPE "simplerisc-baseinfo"
 
 namespace llvm {
 
@@ -32,11 +36,13 @@ ABI computeTargetABI(const Triple &TT, FeatureBitset FeatureBits,
         << "'" << ABIName
         << "' is not a recognized ABI for this target (ignoring target-abi)\n";
   }
+  LLVM_DEBUG(dbgs() << "ABI:" << ABIName << "\n");
 
   if (TargetABI != ABI_Unknown)
     return TargetABI;
 
-  llvm_unreachable("invalid ABI");
+  // TODO:
+  //llvm_unreachable("invalid ABI");
 }
 
 ABI getTargetABI(StringRef ABIName) {
